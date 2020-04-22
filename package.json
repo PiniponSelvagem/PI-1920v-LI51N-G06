@@ -1,0 +1,16 @@
+{
+  "name": "cota",
+  "version": "1.0.0",
+  "description": "Chelas Open TV Application",
+  "main": "cota-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "PI-1920v-LI51N-G06",
+  "license": "ISC",
+  "dependencies": {
+    "debug": "^4.1.1",
+    "express": "^4.17.1",
+    "request": "^2.88.2"
+  }
+}

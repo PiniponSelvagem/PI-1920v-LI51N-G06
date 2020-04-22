@@ -1,0 +1,10 @@
+// install nodemon for easy debug
+npm install -g nodemom
+
+npm init
+npm install express --save
+npm install request --save
+npm install debug --save
+
+set DEBUG=* & nodemon cota-server.js
+set DEBUG=cota:* & nodemon cota-server.js

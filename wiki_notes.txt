@@ -1,0 +1,9 @@
+
+Adding your MovieDb key:
+    - create file named MOVIE_DB_KEY.json inside the folder 'json_files'
+    - open it and create an object with 1 property named key and add in your key
+
+    {
+        "key": "MOVIE_DB_KEY_GOES_HERE"
+    }
+

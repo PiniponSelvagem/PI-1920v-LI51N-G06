@@ -1,0 +1,22 @@
+{
+    "severity_levels": 4,
+    "list": [
+        { "id": 1, "severity": 0, "message": "NO ERROR PLACE HOLDER" },
+        { "id": 2, "severity": 1, "message": "MEDIUM ERROR PLACE HOLDER" },
+        { "id": 3, "severity": 2, "message": "HIGH ERROR PLACE HOLDER" },
+        { "id": 4, "severity": 3, "message": "FATAL ERROR PLACE HOLDER" },
+
+        { "id": 10, "severity": 1, "message": "Requested group not found in our database." },
+        { "id": 11, "severity": 1, "message": "Requested group to edit not found in our database." },
+        { "id": 12, "severity": 1, "message": "Requested group to add a new serie, was not found in our database." },
+        { "id": 13, "severity": 1, "message": "Requested serie to edit not found in our database for the requested group." },
+
+        { "id": 20, "severity": 1, "message": "Invalid syntax for group creation. Correct creation is: '{ \"name\": \"name goes here\", \"description\": \"description goes here\" }" },
+        { "id": 21, "severity": 1, "message": "Invalid syntax for serie creation. Correct creation is: '{ \"id\": \"numerical value\", \"original_name\": \"name1 (optional)\", \"name\": \"name2\", \"description\": \"description goes here\", \"original_language\": \"example region -> pt (optional)\", \"vote_average\": \"numerical value -> [0..10]\" }" },
+        { "id": 22, "severity": 1, "message": "Invalid serie average vote range. Valid range is [0..10]." },
+        { "id": 23, "severity": 1, "message": "Invalid group id. Valid id is a numeric value." },
+        { "id": 24, "severity": 1, "message": "Invalid serie id. Valid id is a numeric value." },
+
+        { "id": 40, "severity": 1, "message": "Requested group already has this serie." }
+    ]
+}
