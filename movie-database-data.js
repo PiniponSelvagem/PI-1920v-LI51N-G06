@@ -6,8 +6,10 @@ module.exports = function (_request, MOVIE_DB_KEY = './json_files/MOVIE_DB_KEY')
     const movieDbKey = require(MOVIE_DB_KEY)
 
     return {
-        getTvPopular : getTvPopular,
-        getTvSearch  : getTvSearch
+        getTvPopular     : getTvPopular,
+        getTvSearch      : getTvSearch,
+        getTvSerieWithID : getTvSerieWithID,
+        //getSeriesByVote  : getSeriesByVote
     }
 
     function getTvPopular(cb) {
@@ -19,13 +21,48 @@ module.exports = function (_request, MOVIE_DB_KEY = './json_files/MOVIE_DB_KEY')
     }
 
     function getTvSearch(params, cb) {
-        const options = buildRequestOptions('/search/tv', {query: params.query})
+        const options = buildRequestOptions('/search/tv', params)
+        debug(params)
         debug(`requesting: ${options.url}`)
         request(options, function(err, res, body) {
             cb(null, JSON.parse(body))
         });
     }
 
+    function getTvSerieWithID(serieId, cbSerie, cb) {
+        const options = buildRequestOptions(`/tv/${serieId}`)
+        debug(`requesting: ${options.url}`)
+        request(options, function(err, res, body) {
+            cbSerie(JSON.parse(body), cb)
+        });
+    }
+
+    /*
+    function getSeriesByVote(seriesIds) {
+        let series = []
+        let i = 0
+        for (let k in seriesIds) {
+            const serieId = seriesIds[k].id
+            const options = buildRequestOptions(`/tv/${serieId}`)
+            debug(`requesting: ${options.url}`)
+            request(options, function(err, res, body) {
+                const serie = JSON.parse(body)
+                cb(getSerieVote(serie.id, serie.vote_average))
+            });
+
+            function getSerieVote(serieId, vote) {
+                return { id: serieId, vote_average: vote }
+            }
+        }
+
+        cb(series)
+    }
+    */
+
+
+    ///////////////////
+    // AUX functions //
+    ///////////////////
     function buildRequestOptions(path, params) {
         let urlParams = ''
         for(let k in params) {

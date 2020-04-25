@@ -51,12 +51,7 @@ module.exports = function (_cotaServices, _error) {
     // POST /cota/api/serie/group/:gid/series
     function addSerieToGroup(req, rsp) {
         const serie = {
-            id: req.body.id,
-            original_name: req.body.original_name,
-            name: req.body.name,
-            description: req.body.description,
-            original_language: req.body.original_language,
-            vote_average: req.body.vote_average
+            id: req.body.id
         }
         cotaServices.addSerieToGroup(req.params.gid, serie, processResponse(rsp, 201))
     }

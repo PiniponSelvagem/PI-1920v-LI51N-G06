@@ -30,19 +30,18 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         cotaDb.getGroupListAll(cb)
     }
 
-    function addGroup(groupToAdd, cb) {
-        if (!groupToAdd.name || !groupToAdd.description) {
+    function addGroup(groupName, groupDesc, cb) {
+        if (!groupName || !groupDesc) {
             return cb(error.get(20))
         }
 
         let id = cotaDb.getNewGroupId();
         let group = {
             id: id,
-            name: name,
-            description: description
+            name: groupName,
+            description: groupDesc
         }
         cotaDb.addGroup(group, cb)
-        debug(`new group added with id: ${group.id}`)
     }
 
     function getGroup(id, cb) {
@@ -63,28 +62,24 @@ module.exports = function (_movieDb, _cotaDb, _error) {
             description: description
         }
         cotaDb.editGroup(group, cb)
-        debug(`edited group with id: ${group.id}`)
     }
 
     function addSerieToGroup(groupId, serieToAdd, cb) {
-        if (isInvalidId(groupId) || isInvalidId(serieToAdd.id) || !serieToAdd.name || !serieToAdd.description) {
+        if (isInvalidId(groupId) || isInvalidId(serieToAdd.id)) {
             return cb(error.get(21))
         }
 
-        if (serieToAdd.vote_average < 0 || serieToAdd.vote_average > 10) {
-            return cb(error.get(22))
-        }
-
-        const serie = {
-            id: serieToAdd.id,
-            original_name: serieToAdd.original_name ? serieToAdd.original_name : "not defined",
-            name: serieToAdd.name,
-            description: serieToAdd.description,
-            original_language: serieToAdd.original_language ? serieToAdd.original_language : "not defined",
-            vote_average: serieToAdd.vote_average
-        }
-        cotaDb.addSerieToGroup(groupId, serie, cb)
-        debug(`added serie with id: ${serie.id} to group with id: ${groupId}`)
+        movieDb.getTvSerieWithID(serieToAdd.id, function(serieMovieDb, cbSerie) {
+            const serie = {
+                id: serieMovieDb.id,
+                original_name: serieMovieDb.original_name,
+                name: serieMovieDb.name,
+                description: serieMovieDb.overview,
+                original_language: serieMovieDb.original_language,
+                vote_average: serieMovieDb.vote_average
+            }
+            cotaDb.addSerieToGroup(groupId, serie, cbSerie)
+        }, cb)
     }
 
     function removeSerieFromGroup(groupId, serieId, cb) {
@@ -95,9 +90,9 @@ module.exports = function (_movieDb, _cotaDb, _error) {
             return cb(error.get(24))
         }
         cotaDb.removeSerieFromGroup(groupId, serieId, cb)
-        debug(`removed serie with id: ${serieId} from group with id: ${groupId}`)
     }
 
+    // TODO: get serieID, ask movieDB for serie with serieID and get average vote
     function getGroupSeriesByVote(groupId, min, max, cb) {
         if (isInvalidId(groupId)) {
             return cb(error.get(23))
@@ -110,7 +105,6 @@ module.exports = function (_movieDb, _cotaDb, _error) {
             return cb(error.get(22))
         }
         
-        debug(`requested series for group with id: ${groupId}, vote average range [${min}..${max}]`)
         cotaDb.getGroupSeriesByVote(groupId, min, max, cb)
     }
 

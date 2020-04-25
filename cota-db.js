@@ -37,6 +37,7 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
 
     function addGroup(group, cb) {
         groups[groups.length] = group
+        debug(`new group added with id: ${group.id}`)
         cb(null, group)
     }
 
@@ -67,6 +68,7 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
         }
         if (group.name) groupToEdit.name = group.name
         if (group.description) groupToEdit.description = group.description
+        debug(`edited group with id: ${group.id}`)
         cb(null, groupToEdit)
     }
 
@@ -79,6 +81,7 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
             return cb(error.get(40))
         }
         group.series[group.series.length] = serie
+        debug(`added serie with id: ${serie.id} to group with id: ${groupId}`)
         cb(null, serie)
     }
 
@@ -94,9 +97,10 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
         const groupIdx = groups.findIndex(i => i.id == groupId)
         const serieIdx = groups[groupIdx].series.findIndex(i => i.id == serieId)
         const serie = groups[groupIdx].series.splice(serieIdx, 1)[0]
+        debug(`removed serie with id: ${serieId} from group with id: ${groupId}`)
         cb(null, serie)
     }
-
+    
     function getGroupSeriesByVote(groupId, min, max, cb) {
         const group = groups.find(i => i.id == groupId);
         if (!group) {
