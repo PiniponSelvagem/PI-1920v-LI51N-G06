@@ -5,13 +5,14 @@
   "main": "cota-server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node it-server.js"
+    "start": "node cota-server.js"
   },
   "author": "PI-1920v-LI51N-G06",
   "license": "ISC",
   "dependencies": {
     "debug": "^4.1.1",
     "express": "^4.17.1",
+    "mocha": "^7.1.1",
     "request": "^2.88.2"
   }
 }

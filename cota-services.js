@@ -13,8 +13,8 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         addGroup             : addGroup,
         getGroup             : getGroup,
         editGroup            : editGroup,
-        addSerieToGroup      : addSerieToGroup,
-        removeSerieFromGroup : removeSerieFromGroup,
+        addSeriesToGroup      : addSeriesToGroup,
+        removeSeriesFromGroup : removeSeriesFromGroup,
         getGroupSeriesByVote : getGroupSeriesByVote
     }
 
@@ -34,14 +34,8 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         if (!groupName || !groupDesc) {
             return cb(error.get(20))
         }
-
-        let id = cotaDb.getNewGroupId();
-        let group = {
-            id: id,
-            name: groupName,
-            description: groupDesc
-        }
-        cotaDb.addGroup(group, cb)
+        
+        cotaDb.addGroup(groupName, groupDesc, cb)
     }
 
     function getGroup(id, cb) {
@@ -52,56 +46,49 @@ module.exports = function (_movieDb, _cotaDb, _error) {
     }
 
     function editGroup(id, name, description, cb) {
-        if (isInvalidId(id) || !name || !description) {
-            return cb(error.get(20))
+        if (isInvalidId(id)) {
+            return cb(error.get(23))
         }
 
-        const group = {
-            id: id,
-            name: name,
-            description: description
-        }
-        cotaDb.editGroup(group, cb)
+        cotaDb.editGroup(id, name, description, cb)
     }
 
-    function addSerieToGroup(groupId, serieToAdd, cb) {
-        if (isInvalidId(groupId) || isInvalidId(serieToAdd.id)) {
+    function addSeriesToGroup(groupId, seriesId, cb) {
+        if (isInvalidId(groupId) || isInvalidId(seriesId)) {
             return cb(error.get(21))
         }
 
-        movieDb.getTvSerieWithID(serieToAdd.id, function(serieMovieDb, cbSerie) {
-            const serie = {
-                id: serieMovieDb.id,
-                original_name: serieMovieDb.original_name,
-                name: serieMovieDb.name,
-                description: serieMovieDb.overview,
-                original_language: serieMovieDb.original_language,
-                vote_average: serieMovieDb.vote_average
+        movieDb.getTvSeriesWithID(seriesId, function(seriesMovieDb, cbSeries) {
+            const series = {
+                id: seriesMovieDb.id,
+                original_name: seriesMovieDb.original_name,
+                name: seriesMovieDb.name,
+                description: seriesMovieDb.overview,
+                original_language: seriesMovieDb.original_language,
+                vote_average: seriesMovieDb.vote_average
             }
-            cotaDb.addSerieToGroup(groupId, serie, cbSerie)
+            cotaDb.addSeriesToGroup(groupId, series, cbSeries)
         }, cb)
     }
 
-    function removeSerieFromGroup(groupId, serieId, cb) {
+    function removeSeriesFromGroup(groupId, seriesId, cb) {
         if (isInvalidId(groupId)) {
             return cb(error.get(23))
         }
-        if (isInvalidId(serieId)) {
+        if (isInvalidId(seriesId)) {
             return cb(error.get(24))
         }
-        cotaDb.removeSerieFromGroup(groupId, serieId, cb)
+        cotaDb.removeSeriesFromGroup(groupId, seriesId, cb)
     }
 
     // TODO: get serieID, ask movieDB for serie with serieID and get average vote
-    function getGroupSeriesByVote(groupId, min, max, cb) {
+    function getGroupSeriesByVote(groupId, min = 0, max = 10, cb) {
         if (isInvalidId(groupId)) {
             return cb(error.get(23))
         }
 
-        min = (min==undefined) ? 0 : min
-        max = (max==undefined) ? 10 : max
-
-        if (isInvalidRange(min, max)) {
+        debug(`Min=${min} & Max=${max}`)
+        if (isNaN(min) || isNaN(max) || isInvalidRange(min, max)) {
             return cb(error.get(22))
         }
         

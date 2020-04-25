@@ -4,118 +4,119 @@ const debug = require('debug')('cota:db')
 module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
     const error = _error
     const groups = require(COTA_DB)
-    let maxId = groups.length
 
     return {
-        getNewGroupId        : getNewGroupId,
         getGroupListAll      : getGroupListAll,
         addGroup             : addGroup,
         getGroup             : getGroup,
         editGroup            : editGroup,
-        addSerieToGroup      : addSerieToGroup,
-        removeSerieFromGroup : removeSerieFromGroup,
+        addSeriesToGroup      : addSeriesToGroup,
+        removeSeriesFromGroup : removeSeriesFromGroup,
         getGroupSeriesByVote : getGroupSeriesByVote
     }
 
-    function getNewGroupId() {
-        return ++maxId
+    function generateGroupId() {
+        return groups[groups.length - 1].id + 1;
     }
 
     function getGroupListAll(cb) {
-        let groupsFiltered = []
-        let i = 0;
-        for (let k in groups) {
-            groupsFiltered[i++] = {
-                id: groups[k].id,
-                name: groups[k].name,
-                description: groups[k].description
-            }
-        }
-        debug(`getGroupListAll found ${groupsFiltered.length} groups`)
-        cb(null, groupsFiltered)
+        let groupsOutput = groups.map( (group) => {
+            return {
+                    id: group.id,
+                    name: group.name,
+                    description: group.description
+                }
+        })
+        debug(`getGroupListAll found ${groupsOutput.length} groups`)
+        cb(null, groupsOutput)
     }
 
-    function addGroup(group, cb) {
-        groups[groups.length] = group
+    function addGroup(groupName, groupDesc, cb) {
+        let group = {
+            id: generateGroupId(),
+            name: groupName,
+            description: groupDesc
+        }
+        groups.push(group)
         debug(`new group added with id: ${group.id}`)
         cb(null, group)
     }
 
-    function getGroup(id, cb) {
-        const group = groups.find(i => i.id == id)
+    function getGroup(groupId, cb) {
+        const group = findGroup(groupId)
         if (!group) {
             return cb(error.get(10))
         }
-        let groupWithFilteredData = {
+
+        let groupOutput = {
             name: group.name,
             description: group.description,
             series: []
         }
-        for (let k in group.series) {
-            groupWithFilteredData.series[k] = {
-                id: group.series[k].id,
-                original_name: group.series[k].original_name,
-                name: group.series[k].name
-            }
+        if(group.series) {
+            groupOutput.series = group.series.map( (series) => {
+                return {
+                        id: series.id,
+                        original_name: series.original_name,
+                        name: series.name
+                    }
+            })
         }
-        cb(null, groupWithFilteredData)
+        cb(null, groupOutput)
     }
 
-    function editGroup(group, cb) {
-        const groupToEdit = groups.find(i => i.id == group.id)
-        if (!groupToEdit) {
+    function editGroup(groupId, name, description, cb) {
+        const group = findById(groupId, groups)
+        if (!group) {
             return cb(error.get(11))
         }
-        if (group.name) groupToEdit.name = group.name
-        if (group.description) groupToEdit.description = group.description
+
+        if(name) group.name = name
+        if(description) group.description = description
         debug(`edited group with id: ${group.id}`)
-        cb(null, groupToEdit)
+        cb(null, group)
     }
 
-    function addSerieToGroup(groupId, serie, cb) {
-        const group = groups.find(i => i.id == groupId)
-        if (!group) {
-            return cb(error.get(12))
+    function addSeriesToGroup(groupId, series, cb) {
+        const group = findById(groupId, groups);
+        if(!group){
+            return cb(error.get(10))
         }
-        if (group.series.find(i => i.id == serie.id)) {
+        if (findById(series.id, group.series)) {
             return cb(error.get(40))
         }
-        group.series[group.series.length] = serie
-        debug(`added serie with id: ${serie.id} to group with id: ${groupId}`)
-        cb(null, serie)
+        group.series.push(series)
+        debug(`added series with id: ${series.id} to group with id: ${groupId}`)
+        cb(null, series)
     }
 
-    function removeSerieFromGroup(groupId, serieId, cb) {
-        const group = groups.find(i => i.id == groupId);
+    function removeSeriesFromGroup(groupId, seriesId, cb) {
+        const group = findById(groupId, groups);
         if (!group) {
             return cb(error.get(11))
         }
-        if (!group.series.find(i => i.id == serieId)) {
+        if (!findById(seriesId, group.series)) {
             return cb(error.get(13))
         }
 
-        const groupIdx = groups.findIndex(i => i.id == groupId)
-        const serieIdx = groups[groupIdx].series.findIndex(i => i.id == serieId)
-        const serie = groups[groupIdx].series.splice(serieIdx, 1)[0]
-        debug(`removed serie with id: ${serieId} from group with id: ${groupId}`)
-        cb(null, serie)
+        let seriesIndex = group.series.findIndex(s => s.id == seriesId);
+        let series = group.series.splice(seriesIndex, 1);
+        debug(`removed series with id: ${seriesId} from group with id: ${groupId}`)
+        cb(null, series)
     }
     
     function getGroupSeriesByVote(groupId, min, max, cb) {
-        const group = groups.find(i => i.id == groupId);
+        const group = findById(groupId, groups)
         if (!group) {
             return cb(error.get(10))
         }
 
-        let series = []
-        let i = 0
-        for (let k in group.series) {
-            const serieInDb = group.series[k]
-            if (serieInDb.vote_average >= min && serieInDb.vote_average <= max) {
-                series[i++] = serieInDb
-            }
-        }
-
+        let series = group.series.filter((s) => s.vote_average >= min && s.vote_average <= max)
+        series.sort((s1,s2) => s2.vote_average - s1.vote_average);
         cb(null, series)
+    }
+
+    function findById(id, array) {
+        return array.find(item => item.id == id)
     }
 }

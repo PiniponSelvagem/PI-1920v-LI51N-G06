@@ -8,7 +8,7 @@ module.exports = function (_request, MOVIE_DB_KEY = './json_files/MOVIE_DB_KEY')
     return {
         getTvPopular     : getTvPopular,
         getTvSearch      : getTvSearch,
-        getTvSerieWithID : getTvSerieWithID,
+        getTvSeriesWithID : getTvSeriesWithID,
         //getSeriesByVote  : getSeriesByVote
     }
 
@@ -29,11 +29,11 @@ module.exports = function (_request, MOVIE_DB_KEY = './json_files/MOVIE_DB_KEY')
         });
     }
 
-    function getTvSerieWithID(serieId, cbSerie, cb) {
-        const options = buildRequestOptions(`/tv/${serieId}`)
+    function getTvSeriesWithID(seriesId, cbSeries, cb) {
+        const options = buildRequestOptions(`/tv/${seriesId}`)
         debug(`requesting: ${options.url}`)
         request(options, function(err, res, body) {
-            cbSerie(JSON.parse(body), cb)
+            cbSeries(JSON.parse(body), cb)
         });
     }
 
