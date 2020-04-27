@@ -103,7 +103,7 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
     ///////////////////
 
     function tryGetById(id, array, onNotFound) {
-        item = array.find(it => it.id == id)
+        item = findById(id, array)
         return item? item : onNotFound()
     }
 

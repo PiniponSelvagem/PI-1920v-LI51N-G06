@@ -60,12 +60,12 @@ module.exports = function (_movieDb, _cotaDb, _error) {
 
         movieDb.getTvSeriesWithID(seriesId, function(seriesMovieDb, cbSeries) {
             const series = {
-                id: series.id,
-                original_name: series.original_name,
-                name: series.name,
-                description: series.overview,
-                original_language: series.original_language,
-                vote_average: series.vote_average
+                id: seriesMovieDb.id,
+                original_name: seriesMovieDb.original_name,
+                name: seriesMovieDb.name,
+                description: seriesMovieDb.overview,
+                original_language: seriesMovieDb.original_language,
+                vote_average: seriesMovieDb.vote_average
             }
             cotaDb.addSeriesToGroup(groupId, series, cbSeries)
         }, cb)
