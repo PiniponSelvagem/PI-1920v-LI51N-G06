@@ -6,13 +6,13 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
     const groups = require(COTA_DB)
 
     return {
-        getGroupListAll      : getGroupListAll,
-        addGroup             : addGroup,
-        getGroup             : getGroup,
-        editGroup            : editGroup,
+        getGroupListAll       : getGroupListAll,
+        addGroup              : addGroup,
+        getGroup              : getGroup,
+        editGroup             : editGroup,
+        tryGetGroup           : tryGetGroup,
         addSeriesToGroup      : addSeriesToGroup,
         removeSeriesFromGroup : removeSeriesFromGroup,
-        getGroupSeriesByVote : getGroupSeriesByVote
     }
 
     function generateGroupId() {
@@ -43,10 +43,7 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
     }
 
     function getGroup(groupId, cb) {
-        const group = findGroup(groupId)
-        if (!group) {
-            return cb(error.get(10))
-        }
+        const group = tryGetGroup(groupId, cb);
 
         let groupOutput = {
             name: group.name,
@@ -66,10 +63,7 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
     }
 
     function editGroup(groupId, name, description, cb) {
-        const group = findById(groupId, groups)
-        if (!group) {
-            return cb(error.get(11))
-        }
+        const group = tryGetGroup(groupId, cb);
 
         if(name) group.name = name
         if(description) group.description = description
@@ -78,45 +72,42 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
     }
 
     function addSeriesToGroup(groupId, series, cb) {
-        const group = findById(groupId, groups);
-        if(!group){
-            return cb(error.get(10))
-        }
-        if (findById(series.id, group.series)) {
+        const group = tryGetGroup(groupId, cb);
+        if(!findById(seriesId, group)) {
             return cb(error.get(40))
         }
+
         group.series.push(series)
         debug(`added series with id: ${series.id} to group with id: ${groupId}`)
         cb(null, series)
     }
 
     function removeSeriesFromGroup(groupId, seriesId, cb) {
-        const group = findById(groupId, groups);
-        if (!group) {
-            return cb(error.get(11))
-        }
-        if (!findById(seriesId, group.series)) {
+        const group = tryGetGroup(groupId, cb);
+        let seriesIndex = group.series.findIndex(s => s.id == seriesId);
+        if (seriesIndex == -1) {
             return cb(error.get(13))
         }
-
-        let seriesIndex = group.series.findIndex(s => s.id == seriesId);
         let series = group.series.splice(seriesIndex, 1);
         debug(`removed series with id: ${seriesId} from group with id: ${groupId}`)
         cb(null, series)
     }
-    
-    function getGroupSeriesByVote(groupId, min, max, cb) {
-        const group = findById(groupId, groups)
-        if (!group) {
-            return cb(error.get(10))
-        }
 
-        let series = group.series.filter((s) => s.vote_average >= min && s.vote_average <= max)
-        series.sort((s1,s2) => s2.vote_average - s1.vote_average);
-        cb(null, series)
+    function tryGetGroup (groupId, cb) {
+        return tryGetById(groupId, groups, () => cb(error.get(10)))
+    }
+
+
+    ///////////////////
+    // AUX functions //
+    ///////////////////
+
+    function tryGetById(id, array, onNotFound) {
+        item = array.find(it => it.id == id)
+        return item? item : onNotFound()
     }
 
     function findById(id, array) {
-        return array.find(item => item.id == id)
+        return array.find(it => it.id == id)
     }
 }

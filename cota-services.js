@@ -60,12 +60,12 @@ module.exports = function (_movieDb, _cotaDb, _error) {
 
         movieDb.getTvSeriesWithID(seriesId, function(seriesMovieDb, cbSeries) {
             const series = {
-                id: seriesMovieDb.id,
-                original_name: seriesMovieDb.original_name,
-                name: seriesMovieDb.name,
-                description: seriesMovieDb.overview,
-                original_language: seriesMovieDb.original_language,
-                vote_average: seriesMovieDb.vote_average
+                id: series.id,
+                original_name: series.original_name,
+                name: series.name,
+                description: series.overview,
+                original_language: series.original_language,
+                vote_average: series.vote_average
             }
             cotaDb.addSeriesToGroup(groupId, series, cbSeries)
         }, cb)
@@ -81,7 +81,6 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         cotaDb.removeSeriesFromGroup(groupId, seriesId, cb)
     }
 
-    // TODO: get serieID, ask movieDB for serie with serieID and get average vote
     function getGroupSeriesByVote(groupId, min = 0, max = 10, cb) {
         if (isInvalidId(groupId)) {
             return cb(error.get(23))
@@ -91,10 +90,36 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         if (isNaN(min) || isNaN(max) || isInvalidRange(min, max)) {
             return cb(error.get(22))
         }
-        
-        cotaDb.getGroupSeriesByVote(groupId, min, max, cb)
-    }
 
+        const series = cotaDb.tryGetGroup(groupId, cb).series
+        if(!series) {
+            return cb(null, [])
+        }
+
+        let seriesByVote = []
+
+        function getSeriesWithAverage (id) {
+            movieDb.getTvSeriesWithID(id, function(seriesMovieDb, cbSeries) {
+                const s = {
+                    id: seriesMovieDb.id,
+                    original_name: seriesMovieDb.original_name,
+                    name: seriesMovieDb.name,
+                    description: seriesMovieDb.overview,
+                    original_language: seriesMovieDb.original_language,
+                    vote_average: seriesMovieDb.vote_average
+                }
+                seriesByVote.push(s)
+                if(seriesByVote.length == series.length) {
+                    seriesByVote = seriesByVote.filter((item) => item.vote_average >= min && item.vote_average <= max)
+                    seriesByVote.sort((s1,s2) => s2.vote_average - s1.vote_average);
+                    cbSeries(null, seriesByVote)
+                } else {
+                    getSeriesWithAverage(series[seriesByVote.length].id)
+                }
+            }, cb)
+        }
+        getSeriesWithAverage(series[0].id)
+    }
 
     ///////////////////
     // AUX functions //
