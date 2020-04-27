@@ -35,7 +35,8 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
         let group = {
             id: generateGroupId(),
             name: groupName,
-            description: groupDesc
+            description: groupDesc,
+            series: []
         }
         groups.push(group)
         debug(`new group added with id: ${group.id}`)
@@ -48,17 +49,14 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
         let groupOutput = {
             name: group.name,
             description: group.description,
-            series: []
         }
-        if(group.series) {
-            groupOutput.series = group.series.map( (series) => {
-                return {
-                        id: series.id,
-                        original_name: series.original_name,
-                        name: series.name
-                    }
-            })
-        }
+        groupOutput.series = group.series.map( (series) => {
+            return {
+                    id: series.id,
+                    original_name: series.original_name,
+                    name: series.name
+                }
+        })
         cb(null, groupOutput)
     }
 
@@ -73,7 +71,7 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
 
     function addSeriesToGroup(groupId, series, cb) {
         const group = tryGetGroup(groupId, cb);
-        if(!findById(series.id, group)) {
+        if(findById(series.id, group.series)) {
             return cb(error.get(40))
         }
 
