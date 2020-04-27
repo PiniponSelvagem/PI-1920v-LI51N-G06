@@ -73,7 +73,7 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
 
     function addSeriesToGroup(groupId, series, cb) {
         const group = tryGetGroup(groupId, cb);
-        if(!findById(seriesId, group)) {
+        if(!findById(series.id, group)) {
             return cb(error.get(40))
         }
 
