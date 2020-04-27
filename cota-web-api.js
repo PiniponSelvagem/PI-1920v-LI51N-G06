@@ -45,7 +45,7 @@ module.exports = function (_cotaServices, _error) {
 
     // PUT /cota/api/series/group/:gid
     function editGroup(req, rsp) {
-        cotaServices.editGroup(req.params.gid, req.body.name, req.body.description, processResponse(rsp, 201))
+        cotaServices.editGroup(req.params.gid, req.body.name, req.body.description, processResponse(rsp))
     }
 
     // POST /cota/api/series/group/:gid/series
