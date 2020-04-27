@@ -10,9 +10,9 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
         addGroup              : addGroup,
         getGroup              : getGroup,
         editGroup             : editGroup,
-        tryGetGroup           : tryGetGroup,
         addSeriesToGroup      : addSeriesToGroup,
         removeSeriesFromGroup : removeSeriesFromGroup,
+        findGroup             : findGroup
     }
 
     function generateGroupId() {
@@ -44,7 +44,10 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
     }
 
     function getGroup(groupId, cb) {
-        const group = tryGetGroup(groupId, cb);
+        const group = findById(groupId, groups);
+        if(!group) {
+            return cb(erro.get(10))
+        }
 
         let groupOutput = {
             name: group.name,
@@ -61,7 +64,10 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
     }
 
     function editGroup(groupId, name, description, cb) {
-        const group = tryGetGroup(groupId, cb);
+        const group = findById(groupId, groups);
+        if(!group) {
+            return cb(error.get(10))
+        }
 
         if(name) group.name = name
         if(description) group.description = description
@@ -70,7 +76,10 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
     }
 
     function addSeriesToGroup(groupId, series, cb) {
-        const group = tryGetGroup(groupId, cb);
+        const group = findById(groupId, groups);
+        if(!group) {
+            return cb(erro.get(10))
+        }
         if(findById(series.id, group.series)) {
             return cb(error.get(40))
         }
@@ -81,7 +90,10 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
     }
 
     function removeSeriesFromGroup(groupId, seriesId, cb) {
-        const group = tryGetGroup(groupId, cb);
+        const group = findById(groupId, groups);
+        if(!group) {
+            return cb(erro.get(10))
+        }
         let seriesIndex = group.series.findIndex(s => s.id == seriesId);
         if (seriesIndex == -1) {
             return cb(error.get(13))
@@ -90,20 +102,14 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
         debug(`removed series with id: ${seriesId} from group with id: ${groupId}`)
         cb(null, series)
     }
-
-    function tryGetGroup (groupId, cb) {
-        return tryGetById(groupId, groups, () => cb(error.get(10)))
+    
+    function findGroup (groupId) {
+        return findById(groupId, groups)
     }
-
 
     ///////////////////
     // AUX functions //
     ///////////////////
-
-    function tryGetById(id, array, onNotFound) {
-        item = findById(id, array)
-        return item? item : onNotFound()
-    }
 
     function findById(id, array) {
         return array.find(it => it.id == id)

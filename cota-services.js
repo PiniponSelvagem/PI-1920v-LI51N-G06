@@ -90,8 +90,11 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         if (isNaN(min) || isNaN(max) || isInvalidRange(min, max)) {
             return cb(error.get(22))
         }
-
-        const series = cotaDb.tryGetGroup(groupId, cb).series
+        const group = cotaDb.findGroup(groupId)
+        if(!group) {
+            return cb(erro.get(10))
+        }
+        const series = group.series
         if(!series) {
             return cb(null, [])
         }
