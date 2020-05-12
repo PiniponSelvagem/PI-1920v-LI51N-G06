@@ -11,7 +11,7 @@ module.exports = function (_cotaServices, _error) {
     router.get('/series/group/list', getGroupListAll)
     router.post('/series/group', addGroup)
     router.get('/series/group/:gid', getGroup)
-    router.put('/series/group/:gid', editGroup)
+    router.post('/series/group/:gid', editGroup)
     router.post('/series/group/:gid/series', addSerieToGroup)
     router.delete('/series/group/:gid/series/:sid', removeSeriesFromGroup)
     router.get('/series/group/:gid/series', getGroupSeriesByVote)
@@ -45,7 +45,7 @@ module.exports = function (_cotaServices, _error) {
         cotaServices.getGroup(req.params.gid).sendResponse(rsp)
     }
 
-    // PUT /cota/api/series/group/:gid
+    // POST /cota/api/series/group/:gid
     function editGroup(req, rsp) {
         cotaServices.editGroup(req.params.gid, req.body.name, req.body.description).sendResponse(rsp)
     }

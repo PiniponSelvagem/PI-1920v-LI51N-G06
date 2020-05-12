@@ -7,7 +7,7 @@ const fetch = require('node-fetch')
 
 const movieDb = require('./movie-database-data')(fetch)
 const error = require('./cota-error')()
-const cotaDb = require('./cota-db')(error)
+const cotaDb = require('./cota-db')(fetch, error)
 const cotaServices = require('./cota-services')(movieDb, cotaDb, error)
 const webApiRouter = require('./cota-web-api')(cotaServices, error)
 

@@ -1,9 +1,16 @@
 
 const debug = require('debug')('cota:db')
 
-module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
+const config = {
+    host: 'localhost',
+    port: 9200,
+    index: "cota"
+}
+
+module.exports = function (_fetch, _error) {
+    const fetch = _fetch
     const error = _error
-    const groups = require(COTA_DB)
+    const uriManager = new UriManager()
 
     return {
         getGroupListAll       : getGroupListAll,
@@ -15,103 +22,158 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
         findGroup             : findGroup
     }
 
-    function generateGroupId() {
-        return groups[groups.length - 1].id + 1;
+    function UriManager() {
+        const baseUri = `http://${config.host}:${config.port}/${config.index}/`
+        this.getGroupListAllUri = () => `${baseUri}_search/`
+        this.addGroupUri = () => `${baseUri}_doc/`
+        this.getGroupUri = (id) => `${baseUri}_doc/${id}`
+        this.editGroupUri = (id) => `${baseUri}_doc/${id}/_update`
+        this.addSerieToGroupUri = (id) => `${baseUri}_doc/${id}/_update`
+        this.removeSeriesFromGroupUri = (id) => `${baseUri}_doc/${id}/_update`
     }
 
-    function getGroupListAll(cb) {
-        let groupsOutput = groups.map( (group) => {
-            return {
-                    id: group.id,
-                    name: group.name,
-                    description: group.description
-                }
-        })
-        debug(`getGroupListAll found ${groupsOutput.length} groups`)
-        return Promise.resolve(groupsOutput)
+    function getGroupListAll() {
+        const uri = uriManager.getGroupListAllUri()
+        return makeRequest(uri)
+            .then(body => body.hits.hits.map(
+                group => {
+                    return {
+                        id: group._id,
+                        name: group._source.name,
+                        description: group._source.description
+                    }
+                }))
+            .then(body => { debug(`getGroupListAll found ${body.length} groups`); return body; })
     }
 
     function addGroup(groupName, groupDesc) {
         let group = {
-            id: generateGroupId(),
             name: groupName,
             description: groupDesc,
             series: []
         }
-        groups.push(group)
-        debug(`new group added with id: ${group.id}`)
-        return Promise.resolve(group)
+
+        const uri = uriManager.addGroupUri()
+        const options = {
+            method: "POST",
+            body: JSON.stringify(group),
+            headers: { 'Content-Type': 'application/json'}
+        }
+        return makeRequest(uri, options)
+            .then(body => { group.id = body._id; return group; })
+            .then(body => { debug(`new group added with id: ${group.id}`); return body; })
     }
 
     function getGroup(groupId) {
-        const group = findById(groupId, groups);
-        if(!group) {
-            return Promise.reject(error.get(10))
-        }
-
-        let groupOutput = {
-            name: group.name,
-            description: group.description,
-        }
-        groupOutput.series = group.series.map( (series) => {
-            return {
-                    id: series.id,
-                    original_name: series.original_name,
-                    name: series.name
+        const uri = uriManager.getGroupUri(groupId)
+        return makeRequest(uri)
+            .then(group => {
+                if(!group.found) {
+                    return Promise.reject(error.get(10))
                 }
-        })
-        return Promise.resolve(groupOutput)
+
+                let groupOutput = {
+                    id: group._id,
+                    name: group._source.name,
+                    description: group._source.description
+                }
+                groupOutput.series = group._source.series.map(series => {
+                    return {
+                            id: series.id,
+                            original_name: series.original_name,
+                            name: series.name
+                        }
+                })
+                return groupOutput
+            })
     }
 
     function editGroup(groupId, name, description) {
-        const group = findById(groupId, groups);
-        if(!group) {
-            return Promise.reject(error.get(10))
+        let doc = {}
+        if(name) doc.name = name
+        if(description) doc.description = description
+        const options = {
+            method: "POST",
+            body: JSON.stringify({ doc: doc}),
+            headers: { 'Content-Type': 'application/json'}
         }
-
-        if(name) group.name = name
-        if(description) group.description = description
-        debug(`edited group with id: ${group.id}`)
-        return Promise.resolve(group)
+        const uri = uriManager.editGroupUri(groupId)
+        return makeRequest(uri, options)
+            .then(body => {
+                if(body.error) {
+                    return Promise.reject(error.get(10))
+                }
+                
+                doc.id = body._id
+                return doc
+            })
+            .then(body => { debug(`edited group with id: ${body.id}`); return body; })
     }
 
     function addSerieToGroup(groupId, serie) {
-        const group = findById(groupId, groups);
-        if(!group) {
-            return Promise.reject(error.get(10))
-        }
-        if(findById(serie.id, group.series)) {
-            return Promise.reject(error.get(40))
+        let script = {
+            script: {
+                inline: "ctx._source.series.add(params.serie)",
+                lang: "painless",
+                params: { serie: serie }
+            }
         }
 
-        group.series.push(serie)
-        debug(`added series with id: ${serie.id} to group with id: ${groupId}`)
-        return Promise.resolve(serie)
+        const uri = uriManager.addSerieToGroupUri(groupId)
+        const options = {
+            method: "POST",
+            body: JSON.stringify(script),
+            headers: { 'Content-Type': 'application/json'}
+        }
+        return makeRequest(uri, options)
+            .then(body => {
+                return serie;
+            })
+            .then(serie => { debug(`added series with id: ${serie.id} to group with id: ${groupId}`); return serie; })
     }
 
-    function removeSeriesFromGroup(groupId, seriesId) {
-        const group = findById(groupId, groups);
-        if(!group) {
-            return Promise.reject(error.get(10))
+    function removeSeriesFromGroup(groupId, serieId) {
+        let script = {
+            script: {
+                inline: `ctx._source.series.removeIf(serie -> serie.id == ${serieId})`,
+                lang: "painless",
+            }
         }
-        let seriesIndex = group.series.findIndex(s => s.id == seriesId);
-        if (seriesIndex == -1) {
-            return Promise.reject(error.get(13))
+
+        const uri = uriManager.removeSeriesFromGroupUri(groupId)
+        const options = {
+            method: "POST",
+            body: JSON.stringify(script),
+            headers: { 'Content-Type': 'application/json'}
         }
-        let series = group.series.splice(seriesIndex, 1);
-        debug(`removed series with id: ${seriesId} from group with id: ${groupId}`)
-        return Promise.resolve(series)
+        return makeRequest(uri, options)
+            .then(body => {
+                if(body.error) {
+                    return Promise.reject(error.get(10))
+                }
+                return { serie: { id: serieId } };
+            })
+            .then(sid => { debug(`removed serie with id: ${serieId} from group with id: ${groupId}`); return sid; })
     }
     
-    function findGroup (groupId) {
+    async function findGroup(groupId) {
+        let groups = await getGroupListAll()
         return findById(groupId, groups)
     }
 
     ///////////////////
     // AUX functions //
     ///////////////////
+    function makeRequest(uri, options) {
+        debug(`request to (ElasticSearch) ${uri}`)
+        return fetch(uri, options)
+            .then(rsp => rsp.json())
+    }
 
-    function findById(id, array) {
-        return array.find(it => it.id == id)
+    async function findById(id, array) {
+        let group = array.find(item => item.id == id)
+        if (!group) return
+        let series = await getGroup(id)
+        return series
     }
 }

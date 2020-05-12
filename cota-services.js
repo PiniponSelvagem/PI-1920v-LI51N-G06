@@ -39,25 +39,14 @@ module.exports = function (_movieDb, _cotaDb, _error) {
     }
 
     function getGroup(id) {
-        if (isInvalidId(id)) {
-            return Promise.reject(error.get(23))
-        }
         return cotaDb.getGroup(id)
     }
 
     function editGroup(id, name, description) {
-        if (isInvalidId(id)) {
-            return Promise.reject(error.get(23))
-        }
-
         return cotaDb.editGroup(id, name, description)
     }
 
     function addSerieToGroup(groupId, seriesId) {
-        if (isInvalidId(groupId) || isInvalidId(seriesId)) {
-            return Promise.reject(error.get(21))
-        }
-
         return movieDb.getTvSeriesWithID(seriesId, function(seriesMovieDb) {
             return seriesMovieDb.then((_serie) => {
                 const serie = {
@@ -65,8 +54,7 @@ module.exports = function (_movieDb, _cotaDb, _error) {
                     original_name: _serie.original_name,
                     name: _serie.name,
                     description: _serie.overview,
-                    original_language: _serie.original_language,
-                    vote_average: _serie.vote_average
+                    original_language: _serie.original_language
                 }
                 return cotaDb.addSerieToGroup(groupId, serie)
             })
@@ -74,25 +62,15 @@ module.exports = function (_movieDb, _cotaDb, _error) {
     }
 
     function removeSeriesFromGroup(groupId, seriesId) {
-        if (isInvalidId(groupId)) {
-            return Promise.reject(error.get(23))
-        }
-        if (isInvalidId(seriesId)) {
-            return Promise.reject(error.get(24))
-        }
         return cotaDb.removeSeriesFromGroup(groupId, seriesId)
     }
 
-    function getGroupSeriesByVote(groupId, min = 0, max = 10) {
-        if (isInvalidId(groupId)) {
-            return Promise.reject(error.get(23))
-        }
-
+    async function getGroupSeriesByVote(groupId, min = 0, max = 10) {
         debug(`Min=${min} & Max=${max}`)
         if (isNaN(min) || isNaN(max) || isInvalidRange(min, max)) {
             return Promise.reject(error.get(22))
         }
-        const group = cotaDb.findGroup(groupId)
+        const group = await cotaDb.findGroup(groupId)
         if(!group) {
             return Promise.reject(error.get(10))
         }
@@ -131,10 +109,6 @@ module.exports = function (_movieDb, _cotaDb, _error) {
     ///////////////////
     // AUX functions //
     ///////////////////
-    function isInvalidId(id) {
-        return !id || !Number(id) || (id < 0)
-    }
-
     function isInvalidRange(min, max) {
         return min > max || min < 0 || max > 10
     }
