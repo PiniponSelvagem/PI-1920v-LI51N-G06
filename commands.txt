@@ -6,5 +6,8 @@ npm install express --save
 npm install request --save
 npm install debug --save
 
+npm unistall request --save
+npm install node-fetch --save
+
 set DEBUG=* & nodemon cota-server.js
 set DEBUG=cota:* & nodemon cota-server.js

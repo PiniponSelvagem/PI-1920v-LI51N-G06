@@ -1,80 +1,48 @@
 
 const debug = require('debug')('cota:movie-database-data')
 
-module.exports = function (_request, MOVIE_DB_KEY = './json_files/MOVIE_DB_KEY') {
-    const request = _request
+module.exports = function (_fetch, MOVIE_DB_KEY = './json_files/MOVIE_DB_KEY') {
+    const fetch = _fetch
     const movieDbKey = require(MOVIE_DB_KEY)
 
     return {
-        getTvPopular     : getTvPopular,
-        getTvSearch      : getTvSearch,
-        getTvSeriesWithID : getTvSeriesWithID,
-        //getSeriesByVote  : getSeriesByVote
+        getTvPopular      : getTvPopular,
+        getTvSearch       : getTvSearch,
+        getTvSeriesWithID : getTvSeriesWithID
     }
 
-    function getTvPopular(cb) {
-        const options = buildRequestOptions('/tv/popular')
-        debug(`requesting: ${options.url}`)
-        request(options, function(err, res, body) {
-            cb(null, JSON.parse(body))
-        });
+    function getTvPopular() {
+        const url = buildUrl('/tv/popular')
+        return makeRequest(url)
     }
 
-    function getTvSearch(params, cb) {
-        const options = buildRequestOptions('/search/tv', params)
-        debug(params)
-        debug(`requesting: ${options.url}`)
-        request(options, function(err, res, body) {
-            cb(null, JSON.parse(body))
-        });
+    function getTvSearch(params) {
+        const url = buildUrl('/search/tv', params)
+        return makeRequest(url)
     }
 
-    function getTvSeriesWithID(seriesId, cbSeries, cb) {
-        const options = buildRequestOptions(`/tv/${seriesId}`)
-        debug(`requesting: ${options.url}`)
-        request(options, function(err, res, body) {
-            cbSeries(JSON.parse(body), cb)
-        });
+    function getTvSeriesWithID(seriesId, serieAddPromise) {
+        const url = buildUrl(`/tv/${seriesId}`)
+        return serieAddPromise(makeRequest(url))
     }
-
-    /*
-    function getSeriesByVote(seriesIds) {
-        let series = []
-        let i = 0
-        for (let k in seriesIds) {
-            const serieId = seriesIds[k].id
-            const options = buildRequestOptions(`/tv/${serieId}`)
-            debug(`requesting: ${options.url}`)
-            request(options, function(err, res, body) {
-                const serie = JSON.parse(body)
-                cb(getSerieVote(serie.id, serie.vote_average))
-            });
-
-            function getSerieVote(serieId, vote) {
-                return { id: serieId, vote_average: vote }
-            }
-        }
-
-        cb(series)
-    }
-    */
 
 
     ///////////////////
     // AUX functions //
     ///////////////////
-    function buildRequestOptions(path, params) {
+    function buildUrl(path, params) {
         let urlParams = ''
         for(let k in params) {
             urlParams += `${k}=${params[k]}&`
         }
         
-        return {    // encodeURI -> supporting special chars, like spaces, あ, á...
-            url: `http://api.themoviedb.org/3${path}?${encodeURI(urlParams)}api_key=${movieDbKey.key}`,
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        };
+        // encodeURI -> supporting special chars, like spaces, あ, á...
+        return `http://api.themoviedb.org/3${path}?${encodeURI(urlParams)}api_key=${movieDbKey.key}`
+    }
+
+    function makeRequest(url, options) {
+        debug(`requesting: ${url}`)
+        return fetch(url, options)
+            .then(rsp => rsp.json())
     }
 }

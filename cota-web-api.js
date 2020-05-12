@@ -12,69 +12,81 @@ module.exports = function (_cotaServices, _error) {
     router.post('/series/group', addGroup)
     router.get('/series/group/:gid', getGroup)
     router.put('/series/group/:gid', editGroup)
-    router.post('/series/group/:gid/series', addSeriesToGroup)
+    router.post('/series/group/:gid/series', addSerieToGroup)
     router.delete('/series/group/:gid/series/:sid', removeSeriesFromGroup)
     router.get('/series/group/:gid/series', getGroupSeriesByVote)
     
+    Promise.prototype.sendResponse = sendResponse
+
     return router
 
     // GET /cota/api/tv/popular
     function getTvPopular(req, rsp) {
-        cotaServices.getTvPopular(processResponse(rsp))
+        cotaServices.getTvPopular().sendResponse(rsp)
     }
 
     // GET /cota/api/tv/search
     function getTvSearch(req, rsp) {
-        cotaServices.getTvSearch(req.query, processResponse(rsp))
+        cotaServices.getTvSearch(req.query).sendResponse(rsp)
     }
 
     // GET /cota/api/series/group/list
     function getGroupListAll(req, rsp) {
-        cotaServices.getGroupListAll(processResponse(rsp))
+        cotaServices.getGroupListAll().sendResponse(rsp)
     }
 
     // POST /cota/api/series/group
     function addGroup(req, rsp) {
-        cotaServices.addGroup(req.body.name, req.body.description, processResponse(rsp, 201))
+        cotaServices.addGroup(req.body.name, req.body.description).sendResponse(rsp, 201)
     }
 
     // GET /cota/api/series/group/:gid
     function getGroup(req, rsp) {
-        cotaServices.getGroup(req.params.gid, processResponse(rsp))
+        cotaServices.getGroup(req.params.gid).sendResponse(rsp)
     }
 
     // PUT /cota/api/series/group/:gid
     function editGroup(req, rsp) {
-        cotaServices.editGroup(req.params.gid, req.body.name, req.body.description, processResponse(rsp))
+        cotaServices.editGroup(req.params.gid, req.body.name, req.body.description).sendResponse(rsp)
     }
 
     // POST /cota/api/series/group/:gid/series
-    function addSeriesToGroup(req, rsp) {
-        cotaServices.addSeriesToGroup(req.params.gid, req.body.id, processResponse(rsp, 201))
+    function addSerieToGroup(req, rsp) {
+        cotaServices.addSerieToGroup(req.params.gid, req.body.id).sendResponse(rsp, 201)
     }
 
     // DELETE /cota/api/series/group/:gid/series/:sid
     function removeSeriesFromGroup(req, rsp) {
-        cotaServices.removeSeriesFromGroup(req.params.gid, req.params.sid, processResponse(rsp))
+        cotaServices.removeSeriesFromGroup(req.params.gid, req.params.sid).sendResponse(rsp)
     }
 
     // GET /cota/api/series/group/:gid/series
     function getGroupSeriesByVote(req, rsp) {
-        cotaServices.getGroupSeriesByVote(req.params.gid, req.query.min, req.query.max, processResponse(rsp))
+        cotaServices.getGroupSeriesByVote(req.params.gid, req.query.min, req.query.max).sendResponse(rsp)
     }
 
 
     ///////////////////
     // AUX functions //
     ///////////////////
-    function processResponse(rsp, sucessStatusCode = 200) {
-        return function processResp(err, cotaObject) {
-            rsp.statusCode = err ? error.toHttpStatusCode(err) : sucessStatusCode
+    function sendResponse(rsp, successStatusCode = 200, errorStatusCode = 500) {
+        this.then(processSuccess(rsp, successStatusCode)).catch(processError(rsp, errorStatusCode))
+    }
+
+    function processSuccess(rsp, statusCode) {
+        return processResponse(rsp, () => statusCode)
+    }
+
+    function processError(rsp, statusCode) {
+        return processResponse(rsp, (data) => error.toHttpStatusCode(data))
+    }
+
+
+    function processResponse(rsp, statusCodeSup) {
+        return function(data) {
+            rsp.statusCode = statusCodeSup(data)
             rsp.setHeader("Content-Type", "application/json")
-            if (err) {
-                cotaObject = { error_code: err.id, message: err.message };
-            }
-            rsp.end(JSON.stringify(cotaObject))
+            rsp.end(JSON.stringify(data))
         }
     }
 }

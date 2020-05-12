@@ -10,7 +10,7 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
         addGroup              : addGroup,
         getGroup              : getGroup,
         editGroup             : editGroup,
-        addSeriesToGroup      : addSeriesToGroup,
+        addSerieToGroup       : addSerieToGroup,
         removeSeriesFromGroup : removeSeriesFromGroup,
         findGroup             : findGroup
     }
@@ -28,10 +28,10 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
                 }
         })
         debug(`getGroupListAll found ${groupsOutput.length} groups`)
-        cb(null, groupsOutput)
+        return Promise.resolve(groupsOutput)
     }
 
-    function addGroup(groupName, groupDesc, cb) {
+    function addGroup(groupName, groupDesc) {
         let group = {
             id: generateGroupId(),
             name: groupName,
@@ -40,13 +40,13 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
         }
         groups.push(group)
         debug(`new group added with id: ${group.id}`)
-        cb(null, group)
+        return Promise.resolve(group)
     }
 
-    function getGroup(groupId, cb) {
+    function getGroup(groupId) {
         const group = findById(groupId, groups);
         if(!group) {
-            return cb(erro.get(10))
+            return Promise.reject(error.get(10))
         }
 
         let groupOutput = {
@@ -60,47 +60,47 @@ module.exports = function (_error, COTA_DB = './json_files/COTA_DB') {
                     name: series.name
                 }
         })
-        cb(null, groupOutput)
+        return Promise.resolve(groupOutput)
     }
 
-    function editGroup(groupId, name, description, cb) {
+    function editGroup(groupId, name, description) {
         const group = findById(groupId, groups);
         if(!group) {
-            return cb(error.get(10))
+            return Promise.reject(error.get(10))
         }
 
         if(name) group.name = name
         if(description) group.description = description
         debug(`edited group with id: ${group.id}`)
-        cb(null, group)
+        return Promise.resolve(group)
     }
 
-    function addSeriesToGroup(groupId, series, cb) {
+    function addSerieToGroup(groupId, serie) {
         const group = findById(groupId, groups);
         if(!group) {
-            return cb(erro.get(10))
+            return Promise.reject(error.get(10))
         }
-        if(findById(series.id, group.series)) {
-            return cb(error.get(40))
+        if(findById(serie.id, group.series)) {
+            return Promise.reject(error.get(40))
         }
 
-        group.series.push(series)
-        debug(`added series with id: ${series.id} to group with id: ${groupId}`)
-        cb(null, series)
+        group.series.push(serie)
+        debug(`added series with id: ${serie.id} to group with id: ${groupId}`)
+        return Promise.resolve(serie)
     }
 
-    function removeSeriesFromGroup(groupId, seriesId, cb) {
+    function removeSeriesFromGroup(groupId, seriesId) {
         const group = findById(groupId, groups);
         if(!group) {
-            return cb(erro.get(10))
+            return Promise.reject(error.get(10))
         }
         let seriesIndex = group.series.findIndex(s => s.id == seriesId);
         if (seriesIndex == -1) {
-            return cb(error.get(13))
+            return Promise.reject(error.get(13))
         }
         let series = group.series.splice(seriesIndex, 1);
         debug(`removed series with id: ${seriesId} from group with id: ${groupId}`)
-        cb(null, series)
+        return Promise.resolve(series)
     }
     
     function findGroup (groupId) {

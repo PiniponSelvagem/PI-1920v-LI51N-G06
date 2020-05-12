@@ -3,9 +3,9 @@ const PORT = 8080
 
 const debug = require('debug')('cota:server')
 const express = require('express')
-const request = require('request')
+const fetch = require('node-fetch')
 
-const movieDb = require('./movie-database-data')(request)
+const movieDb = require('./movie-database-data')(fetch)
 const error = require('./cota-error')()
 const cotaDb = require('./cota-db')(error)
 const cotaServices = require('./cota-services')(movieDb, cotaDb, error)
