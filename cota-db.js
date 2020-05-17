@@ -127,6 +127,9 @@ module.exports = function (_fetch, _error) {
         }
         return makeRequest(uri, options)
             .then(body => {
+                if (body.error) {
+                    return Promise.reject(error.get(10))
+                }
                 return serie;
             })
             .then(serie => { debug(`added series with id: ${serie.id} to group with id: ${groupId}`); return serie; })
