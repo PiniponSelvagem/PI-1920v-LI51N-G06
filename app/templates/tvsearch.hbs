@@ -1,0 +1,29 @@
+<section id="show-tvsearch">
+    <h1>TV Search results for: {{searchquery}}</h1>
+    <table>
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>Original Name</td>
+                <td>Votes</td>
+                <td>First Air Date</td>
+                <td>Language</td>
+                <td>Vote Average</td>
+                <td>Description</td>
+            </tr>
+        </thead>
+        <tbody id="items">
+            {{#each items}}
+            <tr>
+                <td><a href="#seriegroupselector/{{id}}">{{name}}</a></td>
+                <td>{{original_name}}</td>
+                <td>{{vote_count}}</td>
+                <td>{{first_air_date}}</td>
+                <td>{{original_language}}</td>
+                <td>{{vote_average}}</td>
+                <td>{{overview}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</section>

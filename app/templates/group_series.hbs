@@ -1,0 +1,18 @@
+<table id="series-table">
+    <thead>
+        <tr>
+            <td>Name</td>
+            <td>Original Name</td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody id="items">
+        {{#each series}}
+        <tr>
+            <td>{{name}}</td>
+            <td>{{original_name}}</td>
+            <td><button id="btn-delete-serie" value={{id}}>delete</button></td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

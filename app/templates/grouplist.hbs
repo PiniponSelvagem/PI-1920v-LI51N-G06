@@ -1,0 +1,30 @@
+<section id="show-grouplist">
+    <h1>Group List</h1>
+    <table>
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>Description</td>
+            </tr>
+        </thead>
+        <tbody id="items">
+            {{#each this}}
+            <tr>
+                <td><a href="#group/{{id}}">{{name}}</a></td>
+                <td>{{description}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</section>
+
+<section id="create-group">
+    <h2>Create a new Group</h2>
+    <div class="group-data">
+        <div><span>Group name: </span><input type="text" id="name"/></div>
+        <div><span>Group description: </span><input type="text" id="description"/></div>
+    </div>
+    <button id="btn-create-group">
+        Create Group
+    </button>
+</section>

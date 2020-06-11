@@ -1,0 +1,19 @@
+<section id="show-grouplist">
+    <h1>Group List</h1>
+    <table>
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>Description</td>
+            </tr>
+        </thead>
+        <tbody id="items">
+            {{#each this}}
+            <tr>
+                <td><button id="btn-add-serie" value={{id}}>{{name}}</button></td>
+                <td>{{description}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</section>

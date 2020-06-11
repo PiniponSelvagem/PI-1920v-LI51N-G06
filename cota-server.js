@@ -16,5 +16,6 @@ const app = express()
 app.use(express.json())
 
 app.use('/cota/api', webApiRouter)
+app.use('/', express.static('./public'))
 
 app.listen(PORT, debug(`server listening on port ${PORT}`))

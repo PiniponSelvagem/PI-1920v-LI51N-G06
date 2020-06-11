@@ -11,3 +11,14 @@ npm install node-fetch --save
 
 set DEBUG=* & nodemon cota-server.js
 set DEBUG=cota:* & nodemon cota-server.js
+
+
+
+// app
+npm install -g webpack
+npm install -g --save-dev webpack-cli
+npm install --save-dev webpack html-webpack-plugin style-loader css-loader raw-loader url-loader handlebars copy-webpack-plugin
+
+npm install --save cookie-parser
+
+npm run-script build

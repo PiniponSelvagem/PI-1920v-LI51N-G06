@@ -1,0 +1,25 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "Web Browser interface for COTA application",
+  "main": "webpack.config.js",
+  "scripts": {
+    "build": "del /q ..\\public & webpack"
+  },
+  "author": "PI-1920v-LI51N-G06",
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "^3.5.3",
+    "handlebars": "^4.7.6",
+    "html-webpack-plugin": "^4.3.0",
+    "raw-loader": "^4.0.1",
+    "style-loader": "^1.2.1",
+    "url-loader": "^4.1.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "copy-webpack-plugin": "^6.0.2"
+  }
+}

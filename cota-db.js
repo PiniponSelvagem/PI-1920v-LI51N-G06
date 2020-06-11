@@ -4,7 +4,8 @@ const debug = require('debug')('cota:db')
 const config = {
     host: 'localhost',
     port: 9200,
-    index: "cota"
+    index: "cota",
+    max_results: 100 // max results returned by elasticsearch -> DEFAULT: 10
 }
 
 module.exports = function (_fetch, _error) {
@@ -24,12 +25,13 @@ module.exports = function (_fetch, _error) {
 
     function UriManager() {
         const baseUri = `http://${config.host}:${config.port}/${config.index}/`
-        this.getGroupListAllUri = () => `${baseUri}_search/`
-        this.addGroupUri = () => `${baseUri}_doc/`
+        this.getGroupListAllUri = () => `${baseUri}_search?&size=${config.max_results}`
+        this.addGroupUri = () => `${baseUri}_doc`
         this.getGroupUri = (id) => `${baseUri}_doc/${id}`
         this.editGroupUri = (id) => `${baseUri}_doc/${id}/_update`
         this.addSerieToGroupUri = (id) => `${baseUri}_doc/${id}/_update`
         this.removeSeriesFromGroupUri = (id) => `${baseUri}_doc/${id}/_update`
+        this.refresh = () => `${baseUri}_refresh`
     }
 
     function getGroupListAll() {
@@ -59,7 +61,8 @@ module.exports = function (_fetch, _error) {
             body: JSON.stringify(group),
             headers: { 'Content-Type': 'application/json'}
         }
-        return makeRequest(uri, options)
+        return makeRequest(uri, options, true)
+            .then(body => { console.log(body); return body; })
             .then(body => { group.id = body._id; return group; })
             .then(body => { debug(`new group added with id: ${group.id}`); return body; })
     }
@@ -92,13 +95,14 @@ module.exports = function (_fetch, _error) {
         let doc = {}
         if(name) doc.name = name
         if(description) doc.description = description
+        console.log(doc)
         const options = {
             method: "POST",
             body: JSON.stringify({ doc: doc}),
             headers: { 'Content-Type': 'application/json'}
         }
         const uri = uriManager.editGroupUri(groupId)
-        return makeRequest(uri, options)
+        return makeRequest(uri, options, true)
             .then(body => {
                 if(body.error) {
                     return Promise.reject(error.get(10))
@@ -125,7 +129,7 @@ module.exports = function (_fetch, _error) {
             body: JSON.stringify(script),
             headers: { 'Content-Type': 'application/json'}
         }
-        return makeRequest(uri, options)
+        return makeRequest(uri, options, true)
             .then(body => {
                 if (body.error) {
                     return Promise.reject(error.get(10))
@@ -149,7 +153,7 @@ module.exports = function (_fetch, _error) {
             body: JSON.stringify(script),
             headers: { 'Content-Type': 'application/json'}
         }
-        return makeRequest(uri, options)
+        return makeRequest(uri, options, true)
             .then(body => {
                 if(body.error) {
                     return Promise.reject(error.get(10))
@@ -167,10 +171,15 @@ module.exports = function (_fetch, _error) {
     ///////////////////
     // AUX functions //
     ///////////////////
-    function makeRequest(uri, options) {
+    async function makeRequest(uri, options, refresh) {
         debug(`request to (ElasticSearch) ${uri}`)
-        return fetch(uri, options)
-            .then(rsp => rsp.json())
+        const body = await fetch(uri, options).then(rsp => rsp.json())
+
+        if (refresh) {
+            await fetch(uriManager.refresh())
+        }
+
+        return body
     }
 
     async function findById(id, array) {

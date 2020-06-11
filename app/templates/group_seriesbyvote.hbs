@@ -1,0 +1,18 @@
+<table id="series-table"> 
+    <thead>
+        <tr>
+            <td>Name</td>
+            <td>Original Name</td>
+            <td>Vote Average</td>
+        </tr>
+    </thead>
+    <tbody id="items">
+        {{#each series}}
+        <tr>
+            <td>{{name}}</td>
+            <td>{{original_name}}</td>
+            <td>{{vote_average}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
