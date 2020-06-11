@@ -4,25 +4,27 @@
     <div id="series-content"/>
 </section>
 
-<section id="series-by-vote">
-    <h2>Sort series by vote</h2>
-    <div class="data seriesbyvote">
-        <div><span>Lower vote: </span><input type="number" id="votelow" min="0" max="10" step="0.1" value="0"/></div>
-        <div><span>Higher vote: </span><input type="number" id="votehigh" min="0" max="10" step="0.1" value="10"/></div>
-    </div>
-    <button id="btn-series-by-vote">
-        Sort
-    </button>
-</section>
+<div class="data-forms">
+    <section id="series-by-vote">
+        <h2>Sort series by vote</h2>
+        <div class="data-seriesbyvote">
+            <div><span>Lower vote: </span><input type="number" id="votelow" min="0" max="10" step="0.1" value="0"/></div>
+            <div><span>Higher vote: </span><input type="number" id="votehigh" min="0" max="10" step="0.1" value="10"/></div>
+        </div>
+        <button id="btn-series-by-vote">
+            Sort
+        </button>
+    </section>
 
-<section id="edit-group">
-    <h2>Edit this Group</h2>
-    Blank field will be ignored
-    <div class="data group">
-        <div><span>Group name: </span><input type="text" id="name"/></div>
-        <div><span>Group description: </span><input type="text" id="description"/></div>
-    </div>
-    <button id="btn-edit-group">
-        Edit Group
-    </button>
-</section>
+    <section id="edit-group">
+        <h2>Edit this Group</h2>
+        Blank field will be ignored
+        <div class="data-group">
+            <div><span>Group name: </span><input type="text" id="name"/></div>
+            <div><span>Group description: </span><input type="text" id="description"/></div>
+        </div>
+        <button id="btn-edit-group">
+            Edit Group
+        </button>
+    </section>
+</div>
