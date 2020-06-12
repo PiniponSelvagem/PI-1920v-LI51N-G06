@@ -7,26 +7,37 @@ module.exports = {
     editGroup            : editGroup,
     addSerieToGroup      : addSerieToGroup,
     getSeriesByVote      : getSeriesByVote,
-    deleteSerieFromGroup : deleteSerieFromGroup
+    deleteSerieFromGroup : deleteSerieFromGroup,
+
+    login       : login,
+    currentUser : currentUser,
+    logout      : logout
 }
 
 function UriManager() {
     const config = {
         host: 'localhost',
         port: 8080,
-        baseApi: "cota/api/"
+        baseApi: "cota/api",
+        data: "data/",
+        auth: "auth/"
     }
 
-    const baseUri = `http://${config.host}:${config.port}/${config.baseApi}`
-    this.getTvPolularUri = () => `${baseUri}tv/popular`
-    this.getTvSearchUri = (query) => `${baseUri}tv/search?query=${query}`
-    this.getGroupListUri = () => `${baseUri}series/group/list`
-    this.getGroupUri = (id) => `${baseUri}series/group/${id}`
-    this.getAddGroupUri = () => `${baseUri}series/group`
-    this.getEditGroupUri = (id) => `${baseUri}series/group/${id}`
-    this.getSerieAddGroupUri = (id) => `${baseUri}series/group/${id}/series`
-    this.getSeriesByVoteUri = (id, min, max) => `${baseUri}series/group/${id}/series?min=${min}&max=${max}`
-    this.deleteSerieFromGroupUri = (groupId, serieId) => `${baseUri}series/group/${groupId}/series/${serieId}`
+    const dataUri = `http://${config.host}:${config.port}/${config.baseApi}/${config.data}`
+    this.getTvPolularUri = () => `${dataUri}tv/popular`
+    this.getTvSearchUri = (query) => `${dataUri}tv/search?query=${query}`
+    this.getGroupListUri = () => `${dataUri}series/group/list`
+    this.getGroupUri = (id) => `${dataUri}series/group/${id}`
+    this.getAddGroupUri = () => `${dataUri}series/group`
+    this.getEditGroupUri = (id) => `${dataUri}series/group/${id}`
+    this.getSerieAddGroupUri = (id) => `${dataUri}series/group/${id}/series`
+    this.getSeriesByVoteUri = (id, min, max) => `${dataUri}series/group/${id}/series?min=${min}&max=${max}`
+    this.getDeleteSerieFromGroupUri = (groupId, serieId) => `${dataUri}series/group/${groupId}/series/${serieId}`
+
+    const authUri = `http://${config.host}:${config.port}/${config.baseApi}/${config.auth}`
+    this.getLoginUri = () => `${authUri}login`
+    this.getCurrentUserUri = () => `${authUri}currentuser`
+    this.getLogoutUri = () => `${authUri}logout`
 }
 
 const uriManager = new UriManager()
@@ -91,10 +102,41 @@ function getSeriesByVote(groupId, voteRange) {
 }
 
 function deleteSerieFromGroup(groupId, serieId) {
-    return fetch(uriManager.deleteSerieFromGroupUri(groupId, serieId), {
+    return fetch(uriManager.getDeleteSerieFromGroupUri(groupId, serieId), {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
         }
+    }).then(rsp => rsp.json())
+}
+
+
+
+function login(username, password) {
+    const credentials = {
+        username: username,
+        password: password
+    }
+
+    return fetch(uriManager.getLoginUri(), {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(credentials)
+    }).then(rsp => rsp.json())
+}
+
+function currentUser() {
+    return fetch(uriManager.getCurrentUserUri())
+        .then(rsp => rsp.json())
+}
+
+function logout() {
+    return fetch(uriManager.getLogoutUri(), {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+        },
     }).then(rsp => rsp.json())
 }

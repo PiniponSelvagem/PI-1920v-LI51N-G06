@@ -8,5 +8,10 @@ module.exports = {
     group              : Handlebars.compile(require('../templates/group.hbs').default),
     seriegroupselector : Handlebars.compile(require('../templates/seriegroupselector.hbs').default),
     group_series       : Handlebars.compile(require('../templates/group_series.hbs').default),
-    group_seriesbyvote : Handlebars.compile(require('../templates/group_seriesbyvote.hbs').default)
+    group_seriesbyvote : Handlebars.compile(require('../templates/group_seriesbyvote.hbs').default),
+
+    login              : Handlebars.compile(require('../templates/login.hbs').default),
+
+    user_loggedin      : Handlebars.compile(require('../templates/user_logged-in.hbs').default),
+    user_loggedout     : Handlebars.compile(require('../templates/user_logged-out.hbs').default)
 }

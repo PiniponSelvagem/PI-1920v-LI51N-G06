@@ -31,9 +31,6 @@ module.exports = function(cotaData) {
         }
     }
 
-    //TODO: Creating group with empty values shows unfriendly error message
-    //TODO: Creating group with empty values shows unfriendly error message
-    //TODO: Creating group with empty values shows unfriendly error message
     function showGroupList() {
         cotaData.getGroupList().then(showView)
     

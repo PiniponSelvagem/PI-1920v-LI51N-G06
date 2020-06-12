@@ -1,9 +1,9 @@
 
-const debug = require('debug')('cota:web-api')
+const debug = require('debug')('cota:web-api-data')
 const router = require('express').Router()
 
-module.exports = function (_cotaServices, _error) {
-    const cotaServices = _cotaServices
+module.exports = function (_cotaDataServices, _error) {
+    const cotaDataServices = _cotaDataServices
     const error = _error
 
     router.get('/tv/popular', getTvPopular)
@@ -20,54 +20,54 @@ module.exports = function (_cotaServices, _error) {
 
     return router
 
-    // GET /cota/api/tv/popular
+    // GET .../tv/popular
     function getTvPopular(req, rsp) {
-        cotaServices.getTvPopular().sendResponse(rsp)
+        cotaDataServices.getTvPopular().sendResponse(rsp)
     }
 
-    // GET /cota/api/tv/search
+    // GET .../tv/search
     function getTvSearch(req, rsp) {
-        cotaServices.getTvSearch(req.query).sendResponse(rsp)
+        cotaDataServices.getTvSearch(req.query).sendResponse(rsp)
     }
 
-    // GET /cota/api/series/group/list
+    // GET .../series/group/list
     function getGroupListAll(req, rsp) {
-        cotaServices.getGroupListAll().sendResponse(rsp)
+        cotaDataServices.getGroupListAll(req.user).sendResponse(rsp)
     }
 
-    // POST /cota/api/series/group
+    // POST .../series/group
     function addGroup(req, rsp) {
-        cotaServices.addGroup(req.body.name, req.body.description).sendResponse(rsp, 201)
+        cotaDataServices.addGroup(req.user, req.body.name, req.body.description).sendResponse(rsp, 201)
     }
 
-    // GET /cota/api/series/group/:gid
+    // GET .../series/group/:gid
     function getGroup(req, rsp) {
-        cotaServices.getGroup(req.params.gid).sendResponse(rsp)
+        cotaDataServices.getGroup(req.user, req.params.gid).sendResponse(rsp)
     }
 
-    // POST /cota/api/series/group/:gid
+    // POST .../series/group/:gid
     function editGroup(req, rsp) {
-        cotaServices.editGroup(req.params.gid, req.body.name, req.body.description).sendResponse(rsp)
+        cotaDataServices.editGroup(req.user, req.params.gid, req.body.name, req.body.description).sendResponse(rsp)
     }
 
-    // POST /cota/api/series/group/:gid/series
+    // POST .../series/group/:gid/series
     function addSerieToGroup(req, rsp) {
-        cotaServices.addSerieToGroup(req.params.gid, req.body.id).sendResponse(rsp, 201)
+        cotaDataServices.addSerieToGroup(req.user, req.params.gid, req.body.id).sendResponse(rsp, 201)
     }
 
-    // DELETE /cota/api/series/group/:gid/series/:sid
+    // DELETE .../series/group/:gid/series/:sid
     function removeSeriesFromGroup(req, rsp) {
-        cotaServices.removeSeriesFromGroup(req.params.gid, req.params.sid).sendResponse(rsp)
+        cotaDataServices.removeSeriesFromGroup(req.user, req.params.gid, req.params.sid).sendResponse(rsp)
     }
 
-    // GET /cota/api/series/group/:gid/series
+    // GET .../series/group/:gid/series
     function getGroupSeriesByVote(req, rsp) {
-        cotaServices.getGroupSeriesByVote(req.params.gid, req.query.min, req.query.max).sendResponse(rsp)
+        cotaDataServices.getGroupSeriesByVote(req.user, req.params.gid, req.query.min, req.query.max).sendResponse(rsp)
     }
 
 
     ///////////////////
-    // AUX functions //
+    // AUX functions //   // NOTE: THIS CODE IS COMMON TO MODULE: cota-web-api-users
     ///////////////////
     function sendResponse(rsp, successStatusCode = 200, errorStatusCode = 500) {
         this.then(processSuccess(rsp, successStatusCode)).catch(processError(rsp, errorStatusCode))

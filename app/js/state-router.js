@@ -1,6 +1,6 @@
 module.exports = function(states, defaultState) {
     window.onhashchange = stateChanged
-    document.querySelector("#btn-tvsearch").onclick = searchTvShowAction
+    document.querySelector("#btn-navbar-tvsearch").onclick = searchTvShowAction
 
     stateChanged()
 

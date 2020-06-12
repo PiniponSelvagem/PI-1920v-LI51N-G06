@@ -33,6 +33,7 @@ body {
 #logo {
     float: left;
     padding: 10pt 10pt;
+    padding-left: 20pt;
     width: 40px;
 }
 
@@ -62,6 +63,17 @@ body {
 .topnav button:hover {
     background-color: #4CAF50;
     color: white;
+}
+
+.userinfo {
+    float: right;
+    padding: 2pt 20pt;
+}
+.userinfo label {
+    padding: 8pt 20pt;
+    color: #f2f2f2;
+    text-decoration: none;
+    font-size: 14pt;
 }
 
 
@@ -112,7 +124,7 @@ table a {
     text-decoration: none;
 }
 table button {
-    width: 100%
+    padding: 9px 10px;
 }
 table button[id^="btn-delete"] {
     background-color: #9e1800;

@@ -127,6 +127,81 @@ module.exports = content.locals || {};
 
 /***/ }),
 
+/***/ "./js/auth-controller.js":
+/*!*******************************!*\
+  !*** ./js/auth-controller.js ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = function(cotaData) {
+    const mainContent = document.querySelector("#main-content")
+    const userInfoNavBar = document.querySelector("#user-info")
+    const templates = __webpack_require__(/*! ./templates */ "./js/templates.js")
+
+    cotaData.currentUser().then(showCurrentUserInfo)
+
+    return states = {
+        login  : login,
+        logout : logout
+    }
+
+    function showCurrentUserInfo(user) {
+        const userInfo = { username: user.user }
+        if (userInfo.username) {
+            userInfoNavBar.innerHTML = templates.user_loggedin(userInfo)
+            document.querySelector("#btn-navbar-logout").onclick = goToLogout
+        }
+        else {
+            userInfoNavBar.innerHTML = templates.user_loggedout()
+            document.querySelector("#btn-navbar-login").onclick = goToLogin
+        }
+
+        function goToLogin() {
+            location.hash = "login"
+        }
+
+        function goToLogout() {
+            location.hash = "logout"
+        }
+    }
+
+    function login() {
+        mainContent.innerHTML = templates.login()
+        document.querySelector("#user-info").style.display = "none";
+
+        document.querySelector("#btn-auth-login").onclick = doLogin
+
+        function doLogin() {
+            const username = document.querySelector("#username").value
+            const password = document.querySelector("#password").value
+
+            cotaData.login(username, password)
+                .then(processLogin)
+
+            function processLogin(loginStatus) {
+                if (loginStatus.ok) {
+                    cotaData.currentUser().then(showCurrentUserInfo)
+                    document.querySelector("#user-info").style.display = "block";
+                    location.hash = "tvpopular"
+                }
+            }
+        }
+    }
+
+    function logout() {
+        cotaData.logout()
+            .then(processLogout)
+
+        function processLogout() {
+            cotaData.currentUser().then(showCurrentUserInfo)
+            location.hash = "tvpopular"
+        }
+    }
+}
+
+/***/ }),
+
 /***/ "./js/cota-controller.js":
 /*!*******************************!*\
   !*** ./js/cota-controller.js ***!
@@ -167,9 +242,6 @@ module.exports = function(cotaData) {
         }
     }
 
-    //TODO: Creating group with empty values shows unfriendly error message
-    //TODO: Creating group with empty values shows unfriendly error message
-    //TODO: Creating group with empty values shows unfriendly error message
     function showGroupList() {
         cotaData.getGroupList().then(showView)
     
@@ -293,26 +365,37 @@ module.exports = {
     editGroup            : editGroup,
     addSerieToGroup      : addSerieToGroup,
     getSeriesByVote      : getSeriesByVote,
-    deleteSerieFromGroup : deleteSerieFromGroup
+    deleteSerieFromGroup : deleteSerieFromGroup,
+
+    login       : login,
+    currentUser : currentUser,
+    logout      : logout
 }
 
 function UriManager() {
     const config = {
         host: 'localhost',
         port: 8080,
-        baseApi: "cota/api/"
+        baseApi: "cota/api",
+        data: "data/",
+        auth: "auth/"
     }
 
-    const baseUri = `http://${config.host}:${config.port}/${config.baseApi}`
-    this.getTvPolularUri = () => `${baseUri}tv/popular`
-    this.getTvSearchUri = (query) => `${baseUri}tv/search?query=${query}`
-    this.getGroupListUri = () => `${baseUri}series/group/list`
-    this.getGroupUri = (id) => `${baseUri}series/group/${id}`
-    this.getAddGroupUri = () => `${baseUri}series/group`
-    this.getEditGroupUri = (id) => `${baseUri}series/group/${id}`
-    this.getSerieAddGroupUri = (id) => `${baseUri}series/group/${id}/series`
-    this.getSeriesByVoteUri = (id, min, max) => `${baseUri}series/group/${id}/series?min=${min}&max=${max}`
-    this.deleteSerieFromGroupUri = (groupId, serieId) => `${baseUri}series/group/${groupId}/series/${serieId}`
+    const dataUri = `http://${config.host}:${config.port}/${config.baseApi}/${config.data}`
+    this.getTvPolularUri = () => `${dataUri}tv/popular`
+    this.getTvSearchUri = (query) => `${dataUri}tv/search?query=${query}`
+    this.getGroupListUri = () => `${dataUri}series/group/list`
+    this.getGroupUri = (id) => `${dataUri}series/group/${id}`
+    this.getAddGroupUri = () => `${dataUri}series/group`
+    this.getEditGroupUri = (id) => `${dataUri}series/group/${id}`
+    this.getSerieAddGroupUri = (id) => `${dataUri}series/group/${id}/series`
+    this.getSeriesByVoteUri = (id, min, max) => `${dataUri}series/group/${id}/series?min=${min}&max=${max}`
+    this.getDeleteSerieFromGroupUri = (groupId, serieId) => `${dataUri}series/group/${groupId}/series/${serieId}`
+
+    const authUri = `http://${config.host}:${config.port}/${config.baseApi}/${config.auth}`
+    this.getLoginUri = () => `${authUri}login`
+    this.getCurrentUserUri = () => `${authUri}currentuser`
+    this.getLogoutUri = () => `${authUri}logout`
 }
 
 const uriManager = new UriManager()
@@ -377,11 +460,42 @@ function getSeriesByVote(groupId, voteRange) {
 }
 
 function deleteSerieFromGroup(groupId, serieId) {
-    return fetch(uriManager.deleteSerieFromGroupUri(groupId, serieId), {
+    return fetch(uriManager.getDeleteSerieFromGroupUri(groupId, serieId), {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
         }
+    }).then(rsp => rsp.json())
+}
+
+
+
+function login(username, password) {
+    const credentials = {
+        username: username,
+        password: password
+    }
+
+    return fetch(uriManager.getLoginUri(), {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(credentials)
+    }).then(rsp => rsp.json())
+}
+
+function currentUser() {
+    return fetch(uriManager.getCurrentUserUri())
+        .then(rsp => rsp.json())
+}
+
+function logout() {
+    return fetch(uriManager.getLogoutUri(), {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+        },
     }).then(rsp => rsp.json())
 }
 
@@ -396,10 +510,10 @@ function deleteSerieFromGroup(groupId, serieId) {
 
 window.onload = function (e) {
     const cotaData = __webpack_require__(/*! ./cota-data */ "./js/cota-data.js")
-    //const authStates = require('./auth-controller')(issuesData)
-    const cotasStates = __webpack_require__(/*! ./cota-controller */ "./js/cota-controller.js")(cotaData)
+    const authStates = __webpack_require__(/*! ./auth-controller */ "./js/auth-controller.js")(cotaData)
+    const cotaStates = __webpack_require__(/*! ./cota-controller */ "./js/cota-controller.js")(cotaData)
 
-    const states = cotasStates //Object.assign(authStates, issuesStates)
+    const states = Object.assign(authStates, cotaStates)
     __webpack_require__(/*! ./state-router */ "./js/state-router.js")(states, "tvpopular")
 }
 
@@ -414,7 +528,7 @@ window.onload = function (e) {
 
 module.exports = function(states, defaultState) {
     window.onhashchange = stateChanged
-    document.querySelector("#btn-tvsearch").onclick = searchTvShowAction
+    document.querySelector("#btn-navbar-tvsearch").onclick = searchTvShowAction
 
     stateChanged()
 
@@ -462,7 +576,12 @@ module.exports = {
     group              : Handlebars.compile(__webpack_require__(/*! ../templates/group.hbs */ "./templates/group.hbs").default),
     seriegroupselector : Handlebars.compile(__webpack_require__(/*! ../templates/seriegroupselector.hbs */ "./templates/seriegroupselector.hbs").default),
     group_series       : Handlebars.compile(__webpack_require__(/*! ../templates/group_series.hbs */ "./templates/group_series.hbs").default),
-    group_seriesbyvote : Handlebars.compile(__webpack_require__(/*! ../templates/group_seriesbyvote.hbs */ "./templates/group_seriesbyvote.hbs").default)
+    group_seriesbyvote : Handlebars.compile(__webpack_require__(/*! ../templates/group_seriesbyvote.hbs */ "./templates/group_seriesbyvote.hbs").default),
+
+    login              : Handlebars.compile(__webpack_require__(/*! ../templates/login.hbs */ "./templates/login.hbs").default),
+
+    user_loggedin      : Handlebars.compile(__webpack_require__(/*! ../templates/user_logged-in.hbs */ "./templates/user_logged-in.hbs").default),
+    user_loggedout     : Handlebars.compile(__webpack_require__(/*! ../templates/user_logged-out.hbs */ "./templates/user_logged-out.hbs").default)
 }
 
 /***/ }),
@@ -478,7 +597,7 @@ module.exports = {
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ./node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, "body {\r\n    margin: 0;\r\n    font-family: Helvetica;\r\n}\r\n\r\n\r\n.topnav {\r\n    overflow: hidden;\r\n    background-color: #333;\r\n    box-shadow: 0px 5px 5px #888888;\r\n    position: fixed;\r\n    top: 0;\r\n    width: 100%;\r\n}\r\n.topnav a {\r\n    float: left;\r\n    color: #f2f2f2;\r\n    text-align: center;\r\n    padding: 10pt 14pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav a:hover {\r\n    background-color: #ddd;\r\n    color: black;\r\n}\r\n.topnav a.active {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n#logo {\r\n    float: left;\r\n    padding: 10pt 10pt;\r\n    width: 40px;\r\n}\r\n\r\n\r\n.searchbar {\r\n    float: left;\r\n    padding: 2pt 10pt;\r\n}\r\n.searchbar input {\r\n    float: left;\r\n    color: #333;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav button {\r\n    float: center;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    padding: 3pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 13pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n}\r\n.topnav button:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n.content {\r\n    margin: 10pt;\r\n    margin-top: 50pt;\r\n}\r\n\r\n\r\nbutton {\r\n    float: center;\r\n    text-align: center;\r\n    padding: 2pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 10pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n    background-color: #666;\r\n    color: white;\r\n}\r\nbutton:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\ntable  {\r\n    border-collapse: collapse;\r\n}\r\ntable td, table th {\r\n    border: 1px solid #ddd;\r\n    padding: 8px;\r\n}\r\ntable tr:nth-child(even) {\r\n    background-color: #f2f2f2;\r\n}\r\ntable tr:hover {\r\n    background-color: #ddd;\r\n}\r\ntable th {\r\n    padding-top: 12px;\r\n    padding-bottom: 12px;\r\n    text-align: left;\r\n    background-color: #ffb400;\r\n    color: black;\r\n}\r\ntable a {\r\n    text-decoration: none;\r\n}\r\ntable button {\r\n    width: 100%\r\n}\r\ntable button[id^=\"btn-delete\"] {\r\n    background-color: #9e1800;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-delete\"]:hover {\r\n    background-color: #FF0000;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"] {\r\n    background-color: #38823b;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"]:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\ndiv[class^=\"data\"] span {\r\n    display: inline-block;\r\n    width: 20ex\r\n}", ""]);
+exports.push([module.i, "body {\r\n    margin: 0;\r\n    font-family: Helvetica;\r\n}\r\n\r\n\r\n.topnav {\r\n    overflow: hidden;\r\n    background-color: #333;\r\n    box-shadow: 0px 5px 5px #888888;\r\n    position: fixed;\r\n    top: 0;\r\n    width: 100%;\r\n}\r\n.topnav a {\r\n    float: left;\r\n    color: #f2f2f2;\r\n    text-align: center;\r\n    padding: 10pt 14pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav a:hover {\r\n    background-color: #ddd;\r\n    color: black;\r\n}\r\n.topnav a.active {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n#logo {\r\n    float: left;\r\n    padding: 10pt 10pt;\r\n    padding-left: 20pt;\r\n    width: 40px;\r\n}\r\n\r\n\r\n.searchbar {\r\n    float: left;\r\n    padding: 2pt 10pt;\r\n}\r\n.searchbar input {\r\n    float: left;\r\n    color: #333;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav button {\r\n    float: center;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    padding: 3pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 13pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n}\r\n.topnav button:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n.userinfo {\r\n    float: right;\r\n    padding: 2pt 20pt;\r\n}\r\n.userinfo label {\r\n    padding: 8pt 20pt;\r\n    color: #f2f2f2;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n\r\n\r\n.content {\r\n    margin: 10pt;\r\n    margin-top: 50pt;\r\n}\r\n\r\n\r\nbutton {\r\n    float: center;\r\n    text-align: center;\r\n    padding: 2pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 10pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n    background-color: #666;\r\n    color: white;\r\n}\r\nbutton:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\ntable  {\r\n    border-collapse: collapse;\r\n}\r\ntable td, table th {\r\n    border: 1px solid #ddd;\r\n    padding: 8px;\r\n}\r\ntable tr:nth-child(even) {\r\n    background-color: #f2f2f2;\r\n}\r\ntable tr:hover {\r\n    background-color: #ddd;\r\n}\r\ntable th {\r\n    padding-top: 12px;\r\n    padding-bottom: 12px;\r\n    text-align: left;\r\n    background-color: #ffb400;\r\n    color: black;\r\n}\r\ntable a {\r\n    text-decoration: none;\r\n}\r\ntable button {\r\n    padding: 9px 10px;\r\n}\r\ntable button[id^=\"btn-delete\"] {\r\n    background-color: #9e1800;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-delete\"]:hover {\r\n    background-color: #FF0000;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"] {\r\n    background-color: #38823b;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"]:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\ndiv[class^=\"data\"] span {\r\n    display: inline-block;\r\n    width: 20ex\r\n}", ""]);
 // Exports
 module.exports = exports;
 
@@ -6002,7 +6121,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = ("<table id=\"series-table\">\r\n    <thead>\r\n        <tr>\r\n            <th>Name</th>\r\n            <th>Original Name</th>\r\n            <th></th>\r\n        </tr>\r\n    </thead>\r\n    <tbody id=\"items\">\r\n        {{#each series}}\r\n        <tr>\r\n            <td>{{name}}</td>\r\n            <td>{{original_name}}</td>\r\n            <td><button id=\"btn-delete-serie\" value={{id}}>delete</button></td>\r\n        </tr>\r\n        {{/each}}\r\n    </tbody>\r\n</table>");
+/* harmony default export */ __webpack_exports__["default"] = ("<table id=\"series-table\">\r\n    <thead>\r\n        <tr>\r\n            <th>Name</th>\r\n            <th>Original Name</th>\r\n            <th id=\"th-button\"></th>\r\n        </tr>\r\n    </thead>\r\n    <tbody id=\"items\">\r\n        {{#each series}}\r\n        <tr>\r\n            <td>{{name}}</td>\r\n            <td>{{original_name}}</td>\r\n            <td><button id=\"btn-delete-serie\" value={{id}}>delete</button></td>\r\n        </tr>\r\n        {{/each}}\r\n    </tbody>\r\n</table>");
 
 /***/ }),
 
@@ -6029,6 +6148,19 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ("<section id=\"show-grouplist\">\r\n    <h1>Group List</h1>\r\n    <table>\r\n        <thead>\r\n            <tr>\r\n                <th>Name</th>\r\n                <th>Description</th>\r\n            </tr>\r\n        </thead>\r\n        <tbody id=\"items\">\r\n            {{#each this}}\r\n            <tr>\r\n                <td><a href=\"#group/{{id}}\">{{name}}</a></td>\r\n                <td>{{description}}</td>\r\n            </tr>\r\n            {{/each}}\r\n        </tbody>\r\n    </table>\r\n</section>\r\n\r\n<div class=\"data-forms\">\r\n    <section id=\"create-group\">\r\n        <h2>Create a new Group</h2>\r\n        <div class=\"data-group\">\r\n            <div><span>Group name: </span><input type=\"text\" id=\"name\"/></div>\r\n            <div><span>Group description: </span><input type=\"text\" id=\"description\"/></div>\r\n        </div>\r\n        <button id=\"btn-create-group\">\r\n            Create Group\r\n        </button>\r\n    </section>\r\n</div>");
+
+/***/ }),
+
+/***/ "./templates/login.hbs":
+/*!*****************************!*\
+  !*** ./templates/login.hbs ***!
+  \*****************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = ("<div id=\"authentication\">\r\n    <div>\r\n        Username: <input type=\"text\" id=\"username\"\\>\r\n    </div>\r\n    <div>\r\n        Password: <input type=\"password\" id=\"password\"\\>\r\n    </div>\r\n    <button id=\"btn-auth-login\">Login</button>\r\n</div>");
 
 /***/ }),
 
@@ -6081,6 +6213,32 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ("<section id=\"show-tvsearch\">\r\n    <h1>TV Search results for: {{searchquery}}</h1>\r\n    <table>\r\n        <thead>\r\n            <tr>\r\n                <th>Name</th>\r\n                <th>Original Name</th>\r\n                <th>Votes</th>\r\n                <th>First Air Date</th>\r\n                <th>Language</th>\r\n                <th>Vote Average</th>\r\n                <th>Description</th>\r\n            </tr>\r\n        </thead>\r\n        <tbody id=\"items\">\r\n            {{#each items}}\r\n            <tr>\r\n                <td><a href=\"#seriegroupselector/{{id}}\">{{name}}</a></td>\r\n                <td>{{original_name}}</td>\r\n                <td>{{vote_count}}</td>\r\n                <td>{{first_air_date}}</td>\r\n                <td>{{original_language}}</td>\r\n                <td>{{vote_average}}</td>\r\n                <td>{{overview}}</td>\r\n            </tr>\r\n            {{/each}}\r\n        </tbody>\r\n    </table>\r\n</section>");
+
+/***/ }),
+
+/***/ "./templates/user_logged-in.hbs":
+/*!**************************************!*\
+  !*** ./templates/user_logged-in.hbs ***!
+  \**************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = ("<label id=\"username\">{{username}}</label>\r\n<button id=\"btn-navbar-logout\">Logout</button>");
+
+/***/ }),
+
+/***/ "./templates/user_logged-out.hbs":
+/*!***************************************!*\
+  !*** ./templates/user_logged-out.hbs ***!
+  \***************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = ("<button id=\"btn-navbar-login\">Login</button>");
 
 /***/ })
 

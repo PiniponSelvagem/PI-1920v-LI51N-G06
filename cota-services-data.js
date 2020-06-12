@@ -1,5 +1,5 @@
 
-const debug = require('debug')('cota:services')
+const debug = require('debug')('cota:data-services')
 
 module.exports = function (_movieDb, _cotaDb, _error) {
     const movieDb = _movieDb
@@ -26,11 +26,11 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         return movieDb.getTvSearch(params)
     }
 
-    function getGroupListAll() {
+    function getGroupListAll(user) {
         return cotaDb.getGroupListAll()
     }
 
-    function addGroup(groupName, groupDesc) {
+    function addGroup(user, groupName, groupDesc) {
         if (!groupName || !groupDesc) {
             return Promise.reject(error.get(20))
         }
@@ -38,15 +38,15 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         return cotaDb.addGroup(groupName, groupDesc)
     }
 
-    function getGroup(id) {
+    function getGroup(user, id) {
         return cotaDb.getGroup(id)
     }
 
-    function editGroup(id, name, description) {
+    function editGroup(user, id, name, description) {
         return cotaDb.editGroup(id, name, description)
     }
 
-    function addSerieToGroup(groupId, seriesId) {
+    function addSerieToGroup(user, groupId, seriesId) {
         return movieDb.getTvSeriesWithID(seriesId, function(seriesMovieDb) {
             return seriesMovieDb.then((_serie) => {
                 const serie = {
@@ -61,11 +61,11 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         })
     }
 
-    function removeSeriesFromGroup(groupId, seriesId) {
+    function removeSeriesFromGroup(user, groupId, seriesId) {
         return cotaDb.removeSeriesFromGroup(groupId, seriesId)
     }
 
-    async function getGroupSeriesByVote(groupId, min = 0, max = 10) {
+    async function getGroupSeriesByVote(user, groupId, min = 0, max = 10) {
         debug(`Min=${min} & Max=${max}`)
         if (isNaN(min) || isNaN(max) || isInvalidRange(min, max)) {
             return Promise.reject(error.get(22))
@@ -81,7 +81,7 @@ module.exports = function (_movieDb, _cotaDb, _error) {
 
         let seriesByVote = []
 
-        function getSeriesWithAverage (id) {
+        function getSeriesWithAverage(id) {
             return movieDb.getTvSeriesWithID(id, function(seriesMovieDb) {
                 return seriesMovieDb.then((_serie) => {
                     const s = {

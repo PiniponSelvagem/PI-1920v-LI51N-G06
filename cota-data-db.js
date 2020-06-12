@@ -1,5 +1,5 @@
 
-const debug = require('debug')('cota:db')
+const debug = require('debug')('cota:data-db')
 
 const config = {
     host: 'localhost',
