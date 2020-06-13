@@ -1,3 +1,5 @@
+const { template } = require('handlebars')
+
 module.exports = function(cotaData, context) {
     const mainContent = document.querySelector("#main-content")
     const userInfoNavBar = document.querySelector("#user-info")
@@ -32,6 +34,7 @@ module.exports = function(cotaData, context) {
     function login() {
         mainContent.innerHTML = templates.login()
         document.querySelector("#topnav").style.display = "none";
+        const errorMsg = document.querySelector("#error-message")
 
         document.querySelector("#btn-auth-login").onclick = doLogin
         document.querySelector("#btn-auth-register").onclick = doRegister
@@ -49,7 +52,9 @@ module.exports = function(cotaData, context) {
                     Promise.resolve(context.user).then(showCurrentUserInfo)
                     document.querySelector("#topnav").style.display = "block";
                     location.hash = "tvpopular"
+                    return
                 }
+                errorMsg.textContent = loginStatus.message
             }
         }
 
@@ -62,14 +67,10 @@ module.exports = function(cotaData, context) {
 
             function processRegister(registerStatus) {
                 if (registerStatus.ok) {
-                    console.log("TODO: AUTH-CONTROLLER::LOGIN::doRegister")
-                    doLogin()
-                    /*
-                    cotaData.currentUser().then(showCurrentUserInfo)
-                    document.querySelector("#user-info").style.display = "block";
-                    location.hash = "tvpopular"
-                    */
+                    errorMsg.textContent = "User created with success."
+                    return
                 }
+                errorMsg.textContent = registerStatus.message
             }
         }
     }

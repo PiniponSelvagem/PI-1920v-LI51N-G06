@@ -17,6 +17,11 @@
         { "id": 23, "severity": 1, "message": "Invalid group id. Valid id is a numeric value." },
         { "id": 24, "severity": 1, "message": "Invalid serie id. Valid id is a numeric value." },
 
-        { "id": 40, "severity": 1, "message": "Requested group already has this serie." }
+        { "id": 40, "severity": 1, "message": "Requested group already has this serie." },
+
+        { "id": 80, "severity": 1, "message": "That user dosent exist in our database. Check if username is correct or register." },
+        { "id": 81, "severity": 1, "message": "That username is already taken :(" },
+        { "id": 82, "severity": 1, "message": "Incorrect password, try again." },
+        { "id": 83, "severity": 2, "message": "Error when creating user. Please contact the administrator." }
     ]
 }

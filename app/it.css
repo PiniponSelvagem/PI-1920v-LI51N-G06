@@ -107,17 +107,27 @@ button:hover {
     background-color: #ddd;
     box-shadow: 0 0 10px #888888;
 }
-#authentication button{
-    margin: 18pt 0pt;
-    width: 38%
-}
-#authentication input{
-    margin: 4pt 0pt
-}
 #authentication #logo {
     filter: brightness(0%);
     width: 80pt;
     margin: 10pt 10pt 10pt
+}
+#authentication #div-error-message {
+    padding-top: 0pt;
+    padding-bottom: 0pt;
+}
+#authentication input{
+    margin: 4pt 0pt
+}
+#authentication button{
+    margin-top: 7pt;
+    margin-bottom: 18pt;
+    width: 38%
+}
+#authentication #error-message {
+    color: black;
+    text-decoration: none;
+    font-size: 8pt;
 }
 
 

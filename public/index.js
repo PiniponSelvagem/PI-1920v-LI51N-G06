@@ -134,6 +134,8 @@ module.exports = content.locals || {};
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
+const { template } = __webpack_require__(/*! handlebars */ "./node_modules/handlebars/dist/cjs/handlebars.js")
+
 module.exports = function(cotaData, context) {
     const mainContent = document.querySelector("#main-content")
     const userInfoNavBar = document.querySelector("#user-info")
@@ -168,6 +170,7 @@ module.exports = function(cotaData, context) {
     function login() {
         mainContent.innerHTML = templates.login()
         document.querySelector("#topnav").style.display = "none";
+        const errorMsg = document.querySelector("#error-message")
 
         document.querySelector("#btn-auth-login").onclick = doLogin
         document.querySelector("#btn-auth-register").onclick = doRegister
@@ -185,7 +188,9 @@ module.exports = function(cotaData, context) {
                     Promise.resolve(context.user).then(showCurrentUserInfo)
                     document.querySelector("#topnav").style.display = "block";
                     location.hash = "tvpopular"
+                    return
                 }
+                errorMsg.textContent = loginStatus.message
             }
         }
 
@@ -198,14 +203,10 @@ module.exports = function(cotaData, context) {
 
             function processRegister(registerStatus) {
                 if (registerStatus.ok) {
-                    console.log("TODO: AUTH-CONTROLLER::LOGIN::doRegister")
-                    doLogin()
-                    /*
-                    cotaData.currentUser().then(showCurrentUserInfo)
-                    document.querySelector("#user-info").style.display = "block";
-                    location.hash = "tvpopular"
-                    */
+                    errorMsg.textContent = "User created with success."
+                    return
                 }
+                errorMsg.textContent = registerStatus.message
             }
         }
     }
@@ -391,7 +392,7 @@ module.exports = {
 
     register    : register,
     login       : login,
-    currentUser : currentUser,
+    //currentUser : currentUser,
     logout      : logout
 }
 
@@ -418,7 +419,7 @@ function UriManager() {
     const authUri = `http://${config.host}:${config.port}/${config.baseApi}/${config.auth}`
     this.getRegisterUri = () => `${authUri}register`
     this.getLoginUri = () => `${authUri}login`
-    this.getCurrentUserUri = () => `${authUri}currentuser`
+    //this.getCurrentUserUri = () => `${authUri}currentuser`
     this.getLogoutUri = () => `${authUri}logout`
 }
 
@@ -494,10 +495,12 @@ function login(username, password) {
     return doPost(uriManager.getLoginUri(), credentials)
 }
 
+/*
 function currentUser() {
     return fetch(uriManager.getCurrentUserUri())
         .then(rsp => rsp.json())
 }
+*/
 
 function logout() {
     return doPost(uriManager.getLogoutUri())
@@ -617,7 +620,7 @@ module.exports = {
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ./node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, "body {\r\n    margin: 0;\r\n    font-family: Helvetica;\r\n}\r\n\r\n\r\n.topnav {\r\n    overflow: hidden;\r\n    background-color: #333;\r\n    box-shadow: 0px 5px 5px #888888;\r\n    position: fixed;\r\n    top: 0;\r\n    width: 100%;\r\n}\r\n.topnav a {\r\n    float: left;\r\n    color: #f2f2f2;\r\n    text-align: center;\r\n    padding: 10pt 14pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav a:hover {\r\n    background-color: #ddd;\r\n    color: black;\r\n}\r\n.topnav a.active {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n#logo {\r\n    float: left;\r\n    padding: 10pt 10pt;\r\n    padding-left: 20pt;\r\n    width: 40px;\r\n}\r\n\r\n\r\n.searchbar {\r\n    float: left;\r\n    padding: 2pt 10pt;\r\n}\r\n.searchbar input {\r\n    float: left;\r\n    color: #333;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav button {\r\n    float: center;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    padding: 3pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 13pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n}\r\n.topnav button:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n.userinfo {\r\n    float: right;\r\n    padding: 2pt 20pt;\r\n}\r\n.userinfo label {\r\n    padding: 8pt 20pt;\r\n    color: #f2f2f2;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n\r\n\r\n.content {\r\n    margin: 10pt;\r\n    margin-top: 50pt;\r\n}\r\n\r\n\r\nbutton {\r\n    float: center;\r\n    text-align: center;\r\n    padding: 2pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 10pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n    background-color: #666;\r\n    color: white;\r\n}\r\nbutton:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n#authentication {\r\n    margin: auto;\r\n    width: 140pt;\r\n    text-align: center;\r\n    background-color: #ddd;\r\n    box-shadow: 0 0 10px #888888;\r\n}\r\n#authentication button{\r\n    margin: 18pt 0pt;\r\n    width: 38%\r\n}\r\n#authentication input{\r\n    margin: 4pt 0pt\r\n}\r\n#authentication #logo {\r\n    filter: brightness(0%);\r\n    width: 80pt;\r\n    margin: 10pt 10pt 10pt\r\n}\r\n\r\n\r\n\r\ntable  {\r\n    border-collapse: collapse;\r\n}\r\ntable td, table th {\r\n    border: 1px solid #ddd;\r\n    padding: 8px;\r\n}\r\ntable tr:nth-child(even) {\r\n    background-color: #f2f2f2;\r\n}\r\ntable tr:hover {\r\n    background-color: #ddd;\r\n}\r\ntable th {\r\n    padding-top: 12px;\r\n    padding-bottom: 12px;\r\n    text-align: left;\r\n    background-color: #ffb400;\r\n    color: black;\r\n}\r\ntable a {\r\n    text-decoration: none;\r\n}\r\ntable button {\r\n    padding: 9px 10px;\r\n}\r\ntable button[id^=\"btn-delete\"] {\r\n    background-color: #9e1800;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-delete\"]:hover {\r\n    background-color: #FF0000;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"] {\r\n    background-color: #38823b;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"]:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\ndiv[class^=\"data\"] span {\r\n    display: inline-block;\r\n    width: 20ex\r\n}", ""]);
+exports.push([module.i, "body {\r\n    margin: 0;\r\n    font-family: Helvetica;\r\n}\r\n\r\n\r\n.topnav {\r\n    overflow: hidden;\r\n    background-color: #333;\r\n    box-shadow: 0px 5px 5px #888888;\r\n    position: fixed;\r\n    top: 0;\r\n    width: 100%;\r\n}\r\n.topnav a {\r\n    float: left;\r\n    color: #f2f2f2;\r\n    text-align: center;\r\n    padding: 10pt 14pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav a:hover {\r\n    background-color: #ddd;\r\n    color: black;\r\n}\r\n.topnav a.active {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n#logo {\r\n    float: left;\r\n    padding: 10pt 10pt;\r\n    padding-left: 20pt;\r\n    width: 40px;\r\n}\r\n\r\n\r\n.searchbar {\r\n    float: left;\r\n    padding: 2pt 10pt;\r\n}\r\n.searchbar input {\r\n    float: left;\r\n    color: #333;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav button {\r\n    float: center;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    padding: 3pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 13pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n}\r\n.topnav button:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n.userinfo {\r\n    float: right;\r\n    padding: 2pt 20pt;\r\n}\r\n.userinfo label {\r\n    padding: 8pt 20pt;\r\n    color: #f2f2f2;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n\r\n\r\n.content {\r\n    margin: 10pt;\r\n    margin-top: 50pt;\r\n}\r\n\r\n\r\nbutton {\r\n    float: center;\r\n    text-align: center;\r\n    padding: 2pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 10pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n    background-color: #666;\r\n    color: white;\r\n}\r\nbutton:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n#authentication {\r\n    margin: auto;\r\n    width: 140pt;\r\n    text-align: center;\r\n    background-color: #ddd;\r\n    box-shadow: 0 0 10px #888888;\r\n}\r\n#authentication #logo {\r\n    filter: brightness(0%);\r\n    width: 80pt;\r\n    margin: 10pt 10pt 10pt\r\n}\r\n#authentication #div-error-message {\r\n    padding-top: 0pt;\r\n    padding-bottom: 0pt;\r\n}\r\n#authentication input{\r\n    margin: 4pt 0pt\r\n}\r\n#authentication button{\r\n    margin-top: 7pt;\r\n    margin-bottom: 18pt;\r\n    width: 38%\r\n}\r\n#authentication #error-message {\r\n    color: black;\r\n    text-decoration: none;\r\n    font-size: 8pt;\r\n}\r\n\r\n\r\n\r\ntable  {\r\n    border-collapse: collapse;\r\n}\r\ntable td, table th {\r\n    border: 1px solid #ddd;\r\n    padding: 8px;\r\n}\r\ntable tr:nth-child(even) {\r\n    background-color: #f2f2f2;\r\n}\r\ntable tr:hover {\r\n    background-color: #ddd;\r\n}\r\ntable th {\r\n    padding-top: 12px;\r\n    padding-bottom: 12px;\r\n    text-align: left;\r\n    background-color: #ffb400;\r\n    color: black;\r\n}\r\ntable a {\r\n    text-decoration: none;\r\n}\r\ntable button {\r\n    padding: 9px 10px;\r\n}\r\ntable button[id^=\"btn-delete\"] {\r\n    background-color: #9e1800;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-delete\"]:hover {\r\n    background-color: #FF0000;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"] {\r\n    background-color: #38823b;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"]:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\ndiv[class^=\"data\"] span {\r\n    display: inline-block;\r\n    width: 20ex\r\n}", ""]);
 // Exports
 module.exports = exports;
 
@@ -6180,7 +6183,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = ("<div id=\"authentication\">\r\n    <img id=\"logo\" src=\"assets/logo.png\"/>\r\n    <div>\r\n        <input type=\"text\" id=\"username\" placeholder=\"User Name\"\\>\r\n    </div>\r\n    <div>\r\n        <input type=\"password\" id=\"password\" placeholder=\"Password\"\\>\r\n    </div>\r\n    <button id=\"btn-auth-login\">Login</button>\r\n    <button id=\"btn-auth-register\">Register</button>\r\n</div>");
+/* harmony default export */ __webpack_exports__["default"] = ("<div id=\"authentication\">\r\n    <img id=\"logo\" src=\"assets/logo.png\"/>\r\n\r\n    <div>\r\n        <input type=\"text\" id=\"username\" placeholder=\"User Name\"\\>\r\n    </div>\r\n    <div>\r\n        <input type=\"password\" id=\"password\" placeholder=\"Password\"\\>\r\n        <div id=\"div-error-message\">\r\n            <label id=\"error-message\"></label>\r\n        </div>\r\n        <button id=\"btn-auth-login\">Login</button>\r\n        <button id=\"btn-auth-register\">Register</button>\r\n    </div>\r\n</div>");
 
 /***/ }),
 

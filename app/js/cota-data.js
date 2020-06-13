@@ -11,7 +11,7 @@ module.exports = {
 
     register    : register,
     login       : login,
-    currentUser : currentUser,
+    //currentUser : currentUser,
     logout      : logout
 }
 
@@ -38,7 +38,7 @@ function UriManager() {
     const authUri = `http://${config.host}:${config.port}/${config.baseApi}/${config.auth}`
     this.getRegisterUri = () => `${authUri}register`
     this.getLoginUri = () => `${authUri}login`
-    this.getCurrentUserUri = () => `${authUri}currentuser`
+    //this.getCurrentUserUri = () => `${authUri}currentuser`
     this.getLogoutUri = () => `${authUri}logout`
 }
 
@@ -114,10 +114,12 @@ function login(username, password) {
     return doPost(uriManager.getLoginUri(), credentials)
 }
 
+/*
 function currentUser() {
     return fetch(uriManager.getCurrentUserUri())
         .then(rsp => rsp.json())
 }
+*/
 
 function logout() {
     return doPost(uriManager.getLogoutUri())

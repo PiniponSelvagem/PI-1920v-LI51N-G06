@@ -5,7 +5,7 @@ const config = {
     host: 'localhost',
     port: 9200,
     index: "cota_users",
-    max_results: 10000 // max results returned by elasticsearch -> DEFAULT: 10
+    //max_results: 1000 // max results returned by elasticsearch -> DEFAULT: 10
 }
 
 module.exports = function (_fetch, _error) {
@@ -20,67 +20,106 @@ module.exports = function (_fetch, _error) {
 
     function UriManager() {
         const baseUri = `http://${config.host}:${config.port}/${config.index}/`
-        this.getUserUri = () => `${baseUri}_search?&size=${config.max_results}`
+        this.getUserUri = () => `${baseUri}_search`
         this.addUserUri = () => `${baseUri}_doc`
         this.refresh = () => `${baseUri}_refresh`
     }
 
     function getUser(credentials) {
-        /*
-        const uri = uriManager.getGroupUri(groupId)
-        return makeRequest(uri)
-            .then(group => {
-                if(!group.found) {
-                    return Promise.reject(error.get(10))
+        const query = {
+            "query": {
+                "match": {
+                    "username": credentials.username
+                }
+            }
+        }
+
+        return makeRequest(uriManager.getUserUri(), setPostOptions(query))
+            .then(rsp => {
+                if(rsp.error || rsp.hits.total.value == 0) {
+                    return Promise.reject(error.get(80))
+                }
+                
+                const user = rsp.hits.hits[0]._source
+
+                if (user.password != credentials.password) {
+                    return Promise.reject(error.get(82))
                 }
 
-                let groupOutput = {
-                    id: group._id,
-                    name: group._source.name,
-                    description: group._source.description
+                const userOutput = {
+                    username: user.username
                 }
-                groupOutput.series = group._source.series.map(series => {
-                    return {
-                            id: series.id,
-                            original_name: series.original_name,
-                            name: series.name
-                        }
-                })
-                return groupOutput
+                return userOutput
             })
-        */
     }
 
-    function addUser(credentials) {
-        let group = {
-            name: groupName,
-            description: groupDesc,
-            series: []
+    async function addUser(credentials) {
+        const query = {
+            "query": {
+                "match": {
+                    "username": credentials.username
+                }
+            }
         }
-
-        const uri = uriManager.addGroupUri()
-        const options = {
-            method: "POST",
-            body: JSON.stringify(group),
-            headers: { 'Content-Type': 'application/json'}
-        }
-        return makeRequest(uri, options, true)
-            .then(body => { console.log(body); return body; })
-            .then(body => { group.id = body._id; return group; })
-            .then(body => { debug(`new group added with id: ${group.id}`); return body; })
+        
+        // check if user exists
+        await makeRequest(uriManager.getUserUri(), setPostOptions(query))
+            .then(rsp => {
+                    if (rsp.error) {    // elasticsearch not created
+                        /*
+                            The reason why this is empty is because when accessing 'rsp.hits.total.value'
+                            gives 'Uncaught TypeError, so we check if property error exists in 'rsp'
+                            instead.
+                        */
+                        ;
+                    }
+                    else if (rsp.hits.total.value != 0) {
+                        return Promise.reject(error.get(81))
+                    }
+                }
+            )
+        
+        // add and return its username
+        return makeRequest(uriManager.addUserUri(), setPostOptions(credentials))
+            .then(rsp => {
+                    if (rsp.result == "created") {
+                        console.log("created")
+                        const userOutput = {
+                            username: credentials.username
+                        }
+                        return userOutput
+                    }
+                    else {
+                        // ERROR 83 -> Some error occured when adding user to elasticsearch, contact administrator
+                        return Promise.reject(error.get(83))
+                    }
+                }
+            )
     }
 
+
+    
     ///////////////////
     // AUX functions //
     ///////////////////
     async function makeRequest(uri, options, refresh) {
         debug(`request to (ElasticSearch) ${uri}`)
-        const body = await fetch(uri, options).then(rsp => rsp.json())
+        const body = await fetch(uri, options)
+            .then(rsp => rsp.json())
+        
 
         if (refresh) {
             await fetch(uriManager.refresh())
         }
 
         return body
+    }
+
+    function setPostOptions(data) {
+        return {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        }
     }
 }

@@ -1,4 +1,3 @@
-const { register } = require('./app/js/cota-data')
 
 const debug = require('debug')('cota:auth-services')
 
@@ -14,27 +13,16 @@ module.exports = function (_cotaAuthDb, _error) {
 
 
     function register(credentials) {
-        // TODO
-        return Promise.resolve({ok: true, username: credentials.username})
+        return cotaAuthDb.addUser(credentials)
+            .then(() => {return {ok: true, username: credentials.username}})
     }
 
     function login(credentials) {
-        // TODO
-        return Promise.resolve({ok: true, username: credentials.username})
+        return cotaAuthDb.getUser(credentials)
+            .then(() => {return {ok: true, username: credentials.username}})
     }
 
     function logout() {
-        // TODO
         return Promise.resolve({ok: true})
     }
-
-    /*
-    function addGroup(groupName, groupDesc) {
-        if (!groupName || !groupDesc) {
-            return Promise.reject(error.get(20))
-        }
-        
-        return cotaDb.addGroup(groupName, groupDesc)
-    }
-    */
 }

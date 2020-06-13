@@ -22,21 +22,21 @@ const webApiAuthRouter = require('./cota-web-api-auth')(cotaAuthServices, error)
 
 const app = express()
 
-app.use(express.json())
-app.use(cookieParser())
-app.use(passport.initialize())
-app.use(passport.session())
-
 app.use(
     expressSession(
         {
             resave: false,
             saveUninitialized: true,
-            //store: new FileStore(),
             secret: "Leeroy Jenkins"
         }
     )
 )
+
+app.use(express.json())
+app.use(cookieParser())
+app.use(passport.initialize())
+app.use(passport.session())
+
 //app.use(addLoginInformation)    //TODO remove when replaced with passport
 
 app.use('/cota/api/data', webApiDataRouter)

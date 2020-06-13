@@ -5,7 +5,7 @@ const config = {
     host: 'localhost',
     port: 9200,
     index: "cota",
-    max_results: 100 // max results returned by elasticsearch -> DEFAULT: 10
+    max_results: 1000 // max results returned by elasticsearch -> DEFAULT: 10
 }
 
 module.exports = function (_fetch, _error) {
@@ -168,6 +168,8 @@ module.exports = function (_fetch, _error) {
         return findById(groupId, groups)
     }
 
+
+    
     ///////////////////
     // AUX functions //
     ///////////////////

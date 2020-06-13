@@ -10,7 +10,7 @@ module.exports = function (_cotaAuthServices, _error) {
 
     router.post('/register', register)
     router.post('/login', login)
-    router.get('/currentuser', currentUser)
+    //router.get('/currentuser', currentUser)
     router.post('/logout', logout)
 
     
@@ -22,8 +22,6 @@ module.exports = function (_cotaAuthServices, _error) {
     // POST .../register
     function register(req, rsp) {
         const credentials = req.body
-        debug("REGISTERING USER: ", credentials)
-        //cotaServices.addGroup(req.body.name, req.body.description).sendResponse(rsp, 201)
         cotaAuthServices.register(credentials)
             .sendResponse(rsp)
     }
@@ -32,35 +30,37 @@ module.exports = function (_cotaAuthServices, _error) {
     function login(req, rsp) {
         const credentials = req.body
         cotaAuthServices.login(credentials)
-            .then(addAuthCookie)
+            .then(validateUser)
             .sendResponse(rsp)
 
-        function addAuthCookie(loginStatus) {
+        function validateUser(loginStatus) {
+            console.log(loginStatus)
             if (loginStatus.ok) {
                 req.logIn({
                     username: req.body.username
                 }, (err) => rsp.json(loginStatus))
-                //rsp.cookie(AUTH_COOKIE_NAME, credentials.username)
             }
             return loginStatus
         }
     }
 
     // GET .../currentuser
+    /*
     function currentUser(req, rsp) {
-        Promise.resolve({user: req.user}).sendResponse(rsp)
+        Promise.resolve({user: req.user}).then(rsp => {console.log(rsp); return rsp}).sendResponse(rsp)
     }
+    */
 
     // POST .../logout
     function logout(req, rsp) {
+        console.log(req.isAuthenticated(), req.user)
         cotaAuthServices.logout()
-            .then(removeAuthCookie)
+            .then(logoutUser)
             .sendResponse(rsp)
 
-        function removeAuthCookie(logoutStatus) {
+        function logoutUser(logoutStatus) {
             if (logoutStatus.ok) {
                 req.logOut({}, (err) => rsp.json(logoutStatus))
-                //rsp.clearCookie(AUTH_COOKIE_NAME)
             }
             return logoutStatus
         }
@@ -85,11 +85,6 @@ module.exports = function (_cotaAuthServices, _error) {
         if(req.isAuthenticated())
             return next()
         rsp.status(403).send("Authenticate at '/login'")
-    }
-      
-    function logout(req, rsp) {
-        req.logOut()
-        rsp.redirect('/home')
     }
     */
 
