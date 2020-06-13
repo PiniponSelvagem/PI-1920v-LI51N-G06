@@ -33,7 +33,7 @@ module.exports = function(cotaData, context) {
 
     function login() {
         mainContent.innerHTML = templates.login()
-        document.querySelector("#topnav").style.display = "none";
+        document.querySelector(".topnav").style.display = "none";
         const errorMsg = document.querySelector("#error-message")
 
         document.querySelector("#btn-auth-login").onclick = doLogin
@@ -50,7 +50,7 @@ module.exports = function(cotaData, context) {
                 context.user = { username: loginStatus.username }
                 if (loginStatus.ok) {
                     Promise.resolve(context.user).then(showCurrentUserInfo)
-                    document.querySelector("#topnav").style.display = "block";
+                    document.querySelector(".topnav").style.display = "block";
                     location.hash = "tvpopular"
                     return
                 }

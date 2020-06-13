@@ -169,7 +169,7 @@ module.exports = function(cotaData, context) {
 
     function login() {
         mainContent.innerHTML = templates.login()
-        document.querySelector("#topnav").style.display = "none";
+        document.querySelector(".topnav").style.display = "none";
         const errorMsg = document.querySelector("#error-message")
 
         document.querySelector("#btn-auth-login").onclick = doLogin
@@ -186,7 +186,7 @@ module.exports = function(cotaData, context) {
                 context.user = { username: loginStatus.username }
                 if (loginStatus.ok) {
                     Promise.resolve(context.user).then(showCurrentUserInfo)
-                    document.querySelector("#topnav").style.display = "block";
+                    document.querySelector(".topnav").style.display = "block";
                     location.hash = "tvpopular"
                     return
                 }
@@ -241,7 +241,8 @@ module.exports = function(cotaData, context) {
         tvsearch           : showTvSearch,
         grouplist          : showGroupList,
         group              : showGroup,
-        seriegroupselector : showSerieAddGroupList
+        seriegroupselector : showSerieAddGroupList,
+        nonauthenticated   : showNonAuthenticated
     }
 
     function showTvPopular() {
@@ -269,15 +270,18 @@ module.exports = function(cotaData, context) {
         cotaData.getGroupList().then(showView)
     
         function showView(items) {
+            if (items.message && items.id==60) {
+                showNonAuthenticated()
+                return
+            }
             mainContent.innerHTML = templates.grouplist(items)
             document.querySelector("#btn-create-group").onclick = createGroup
         }
         
         function createGroup() {
             let group = { }
-            document.querySelectorAll(".group-data input")
+            document.querySelectorAll(".data-group input")
                 .forEach(input => group[input.id] = input.value)
-            
             cotaData.createGroup(group)
                 .then(group => group.message ? showError(group) : showGroupList())
         }
@@ -287,8 +291,9 @@ module.exports = function(cotaData, context) {
         cotaData.getGroup(id).then(showView)
     
         function showView(items) {
-            if (items.message) {
-                showError(items)
+            if (items.message && items.id==60) {
+                showNonAuthenticated()
+                return
             }
             else {
                 mainContent.innerHTML = templates.group(items)
@@ -340,6 +345,10 @@ module.exports = function(cotaData, context) {
         cotaData.getGroupList().then(showView)
     
         function showView(items) {
+            if (items.message && items.id==60) {
+                showNonAuthenticated()
+                return
+            }
             mainContent.innerHTML = templates.seriegroupselector(items)
 
             const buttons = document.querySelectorAll("#btn-add-serie")
@@ -357,12 +366,17 @@ module.exports = function(cotaData, context) {
         }
     }
     
-
-
-
     function showSeriesByVote(groupInfo) {
+        if (items.message && items.id==60) {
+            showNonAuthenticated()
+            return
+        }
         const table = document.querySelector("#series-content")
         table.innerHTML = templates.group_seriesbyvote(groupInfo)
+    }
+
+    function showNonAuthenticated() {    
+        mainContent.innerHTML = templates.nonauthenticated()
     }
 
     function showError(error) {
@@ -419,7 +433,6 @@ function UriManager() {
     const authUri = `http://${config.host}:${config.port}/${config.baseApi}/${config.auth}`
     this.getRegisterUri = () => `${authUri}register`
     this.getLoginUri = () => `${authUri}login`
-    //this.getCurrentUserUri = () => `${authUri}currentuser`
     this.getLogoutUri = () => `${authUri}logout`
 }
 
@@ -494,13 +507,6 @@ function login(username, password) {
     
     return doPost(uriManager.getLoginUri(), credentials)
 }
-
-/*
-function currentUser() {
-    return fetch(uriManager.getCurrentUserUri())
-        .then(rsp => rsp.json())
-}
-*/
 
 function logout() {
     return doPost(uriManager.getLogoutUri())
@@ -604,7 +610,9 @@ module.exports = {
     login              : Handlebars.compile(__webpack_require__(/*! ../templates/login.hbs */ "./templates/login.hbs").default),
 
     user_loggedin      : Handlebars.compile(__webpack_require__(/*! ../templates/user_logged-in.hbs */ "./templates/user_logged-in.hbs").default),
-    user_loggedout     : Handlebars.compile(__webpack_require__(/*! ../templates/user_logged-out.hbs */ "./templates/user_logged-out.hbs").default)
+    user_loggedout     : Handlebars.compile(__webpack_require__(/*! ../templates/user_logged-out.hbs */ "./templates/user_logged-out.hbs").default),
+
+    nonauthenticated   : Handlebars.compile(__webpack_require__(/*! ../templates/nonauthenticated.hbs */ "./templates/nonauthenticated.hbs").default)
 }
 
 /***/ }),
@@ -6184,6 +6192,19 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ("<div id=\"authentication\">\r\n    <img id=\"logo\" src=\"assets/logo.png\"/>\r\n\r\n    <div>\r\n        <input type=\"text\" id=\"username\" placeholder=\"User Name\"\\>\r\n    </div>\r\n    <div>\r\n        <input type=\"password\" id=\"password\" placeholder=\"Password\"\\>\r\n        <div id=\"div-error-message\">\r\n            <label id=\"error-message\"></label>\r\n        </div>\r\n        <button id=\"btn-auth-login\">Login</button>\r\n        <button id=\"btn-auth-register\">Register</button>\r\n    </div>\r\n</div>");
+
+/***/ }),
+
+/***/ "./templates/nonauthenticated.hbs":
+/*!****************************************!*\
+  !*** ./templates/nonauthenticated.hbs ***!
+  \****************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = ("<section id=\"show-nonauthenticated\">\r\n    <h1>Access denied</h1>\r\n    <h3>Please login to access this resource.</h3>\r\n    <img src=\"assets/illidan.png\"/>\r\n</section>");
 
 /***/ }),
 

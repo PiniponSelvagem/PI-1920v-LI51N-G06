@@ -13,5 +13,7 @@ module.exports = {
     login              : Handlebars.compile(require('../templates/login.hbs').default),
 
     user_loggedin      : Handlebars.compile(require('../templates/user_logged-in.hbs').default),
-    user_loggedout     : Handlebars.compile(require('../templates/user_logged-out.hbs').default)
+    user_loggedout     : Handlebars.compile(require('../templates/user_logged-out.hbs').default),
+
+    nonauthenticated   : Handlebars.compile(require('../templates/nonauthenticated.hbs').default)
 }

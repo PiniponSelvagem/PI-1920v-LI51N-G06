@@ -6,11 +6,8 @@ module.exports = function (_cotaAuthServices, _error) {
     const cotaAuthServices = _cotaAuthServices
     const error = _error
 
-    //const AUTH_COOKIE_NAME = "Auth"
-
     router.post('/register', register)
     router.post('/login', login)
-    //router.get('/currentuser', currentUser)
     router.post('/logout', logout)
 
     
@@ -44,13 +41,6 @@ module.exports = function (_cotaAuthServices, _error) {
         }
     }
 
-    // GET .../currentuser
-    /*
-    function currentUser(req, rsp) {
-        Promise.resolve({user: req.user}).then(rsp => {console.log(rsp); return rsp}).sendResponse(rsp)
-    }
-    */
-
     // POST .../logout
     function logout(req, rsp) {
         console.log(req.isAuthenticated(), req.user)
@@ -66,27 +56,6 @@ module.exports = function (_cotaAuthServices, _error) {
         }
     }
 
-
-    /*
-    function validateLogin(req, rsp) {
-        if(validateUser(req.body.username, req.body.password)) {
-          console.log(req.body)
-          req.logIn({
-             username: req.body.username
-          }, (err) => rsp.redirect('/home'))
-          return;
-        }
-        else rsp.redirect('/login')
-      
-        function validateUser(){ return true; }
-    }
-      
-    function verifyAuthenticated(req, rsp, next) {
-        if(req.isAuthenticated())
-            return next()
-        rsp.status(403).send("Authenticate at '/login'")
-    }
-    */
 
 
     ///////////////////

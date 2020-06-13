@@ -32,7 +32,12 @@ module.exports = function (_cotaDataServices, _error) {
 
     // GET .../series/group/list
     function getGroupListAll(req, rsp) {
-        cotaDataServices.getGroupListAll(req.user).sendResponse(rsp)
+        if (!req.isAuthenticated()) {
+            Promise.resolve(error.get(60)).sendResponse(rsp)
+        }
+        else {
+            cotaDataServices.getGroupListAll(req.user).sendResponse(rsp)
+        }
     }
 
     // POST .../series/group
@@ -69,6 +74,15 @@ module.exports = function (_cotaDataServices, _error) {
     ///////////////////
     // AUX functions //   // NOTE: THIS CODE IS COMMON TO MODULE: cota-web-api-users
     ///////////////////
+    function sendAuthenticatedResponse(response) {
+        if (!req.isAuthenticated()) {
+            Promise.reject(error.get(60)).sendResponse(rsp)
+        }
+        else {
+            response()
+        }
+    }
+
     function sendResponse(rsp, successStatusCode = 200, errorStatusCode = 500) {
         this.then(processSuccess(rsp, successStatusCode)).catch(processError(rsp, errorStatusCode))
     }

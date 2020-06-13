@@ -7,7 +7,8 @@ module.exports = function(cotaData, context) {
         tvsearch           : showTvSearch,
         grouplist          : showGroupList,
         group              : showGroup,
-        seriegroupselector : showSerieAddGroupList
+        seriegroupselector : showSerieAddGroupList,
+        nonauthenticated   : showNonAuthenticated
     }
 
     function showTvPopular() {
@@ -35,15 +36,18 @@ module.exports = function(cotaData, context) {
         cotaData.getGroupList().then(showView)
     
         function showView(items) {
+            if (items.message && items.id==60) {
+                showNonAuthenticated()
+                return
+            }
             mainContent.innerHTML = templates.grouplist(items)
             document.querySelector("#btn-create-group").onclick = createGroup
         }
         
         function createGroup() {
             let group = { }
-            document.querySelectorAll(".group-data input")
+            document.querySelectorAll(".data-group input")
                 .forEach(input => group[input.id] = input.value)
-            
             cotaData.createGroup(group)
                 .then(group => group.message ? showError(group) : showGroupList())
         }
@@ -53,8 +57,9 @@ module.exports = function(cotaData, context) {
         cotaData.getGroup(id).then(showView)
     
         function showView(items) {
-            if (items.message) {
-                showError(items)
+            if (items.message && items.id==60) {
+                showNonAuthenticated()
+                return
             }
             else {
                 mainContent.innerHTML = templates.group(items)
@@ -106,6 +111,10 @@ module.exports = function(cotaData, context) {
         cotaData.getGroupList().then(showView)
     
         function showView(items) {
+            if (items.message && items.id==60) {
+                showNonAuthenticated()
+                return
+            }
             mainContent.innerHTML = templates.seriegroupselector(items)
 
             const buttons = document.querySelectorAll("#btn-add-serie")
@@ -123,12 +132,17 @@ module.exports = function(cotaData, context) {
         }
     }
     
-
-
-
     function showSeriesByVote(groupInfo) {
+        if (items.message && items.id==60) {
+            showNonAuthenticated()
+            return
+        }
         const table = document.querySelector("#series-content")
         table.innerHTML = templates.group_seriesbyvote(groupInfo)
+    }
+
+    function showNonAuthenticated() {    
+        mainContent.innerHTML = templates.nonauthenticated()
     }
 
     function showError(error) {
