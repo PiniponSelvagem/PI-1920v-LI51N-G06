@@ -24,6 +24,7 @@
         { "id": 80, "severity": 0, "message": "That user dosent exist in our database. Check if username is correct or register." },
         { "id": 81, "severity": 0, "message": "That username is already taken :(" },
         { "id": 82, "severity": 0, "message": "Incorrect password, try again." },
-        { "id": 83, "severity": 3, "message": "Error when creating user. Please contact the administrator." }
+        { "id": 83, "severity": 2, "message": "Error when creating user. Please contact the administrator." },
+        { "id": 84, "severity": 2, "message": "Stopped unauthorized access to resource. Please contact administrator and check elasticsearch queries." }
     ]
 }

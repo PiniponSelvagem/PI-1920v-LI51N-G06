@@ -20,22 +20,15 @@ module.exports = function (_fetch, _error) {
 
     function UriManager() {
         const baseUri = `http://${config.host}:${config.port}/${config.index}/`
-        this.getUserUri = () => `${baseUri}_search`
+        this.getUserUri = (username) => `${baseUri}_search?q=username:${username}`
         this.addUserUri = () => `${baseUri}_doc`
         this.refresh = () => `${baseUri}_refresh`
     }
 
     function getUser(credentials) {
-        const query = {
-            "query": {
-                "match": {
-                    "username": credentials.username
-                }
-            }
-        }
-
-        return makeRequest(uriManager.getUserUri(), setPostOptions(query))
+        return makeRequest(uriManager.getUserUri(credentials.username))
             .then(rsp => {
+                console.log(rsp)
                 if(rsp.error || rsp.hits.total.value == 0) {
                     return Promise.reject(error.get(80))
                 }
@@ -53,17 +46,9 @@ module.exports = function (_fetch, _error) {
             })
     }
 
-    async function addUser(credentials) {
-        const query = {
-            "query": {
-                "match": {
-                    "username": credentials.username
-                }
-            }
-        }
-        
+    async function addUser(credentials) {        
         // check if user exists
-        await makeRequest(uriManager.getUserUri(), setPostOptions(query))
+        await makeRequest(uriManager.getUserUri(), credentials.username)
             .then(rsp => {
                     if (rsp.error) {    // elasticsearch not created
                         /*
@@ -118,7 +103,7 @@ module.exports = function (_fetch, _error) {
     function setPostOptions(data) {
         return {
             method: "POST",
-            headers: { 'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         }
     }

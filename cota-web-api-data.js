@@ -32,12 +32,8 @@ module.exports = function (_cotaDataServices, _error) {
 
     // GET .../series/group/list
     function getGroupListAll(req, rsp) {
-        if (!req.isAuthenticated()) {
-            Promise.resolve(error.get(60)).sendResponse(rsp)
-        }
-        else {
-            cotaDataServices.getGroupListAll(req.user).sendResponse(rsp)
-        }
+        req.isAuthenticated() ?
+            cotaDataServices.getGroupListAll(req.user).sendResponse(rsp) : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 
     // POST .../series/group

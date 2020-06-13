@@ -25,7 +25,7 @@ module.exports = function (_fetch, _error) {
 
     function UriManager() {
         const baseUri = `http://${config.host}:${config.port}/${config.index}/`
-        this.getGroupListAllUri = () => `${baseUri}_search?&size=${config.max_results}`
+        this.getGroupListAllUri = (username) => `${baseUri}_search?q=username:${username}&size=${config.max_results}`
         this.addGroupUri = () => `${baseUri}_doc`
         this.getGroupUri = (id) => `${baseUri}_doc/${id}`
         this.editGroupUri = (id) => `${baseUri}_doc/${id}/_update`
@@ -34,8 +34,8 @@ module.exports = function (_fetch, _error) {
         this.refresh = () => `${baseUri}_refresh`
     }
 
-    function getGroupListAll() {
-        const uri = uriManager.getGroupListAllUri()
+    function getGroupListAll(user) {
+        const uri = uriManager.getGroupListAllUri(user.username)
         return makeRequest(uri)
             .then(body => body.hits.hits.map(
                 group => {
@@ -48,8 +48,9 @@ module.exports = function (_fetch, _error) {
             .then(body => { debug(`getGroupListAll found ${body.length} groups`); return body; })
     }
 
-    function addGroup(groupName, groupDesc) {
+    function addGroup(user, groupName, groupDesc) {
         let group = {
+            username: user.username,
             name: groupName,
             description: groupDesc,
             series: []
@@ -62,17 +63,19 @@ module.exports = function (_fetch, _error) {
             headers: { 'Content-Type': 'application/json'}
         }
         return makeRequest(uri, options, true)
-            .then(body => { console.log(body); return body; })
             .then(body => { group.id = body._id; return group; })
             .then(body => { debug(`new group added with id: ${group.id}`); return body; })
     }
 
-    function getGroup(groupId) {
+    function getGroup(user, groupId) {
         const uri = uriManager.getGroupUri(groupId)
         return makeRequest(uri)
             .then(group => {
-                if(!group.found) {
+                if (!group.found) {
                     return Promise.reject(error.get(10))
+                }
+                if (group._source.username != user.username) {
+                    return Promise.reject(error.get(84))
                 }
 
                 let groupOutput = {
@@ -91,18 +94,18 @@ module.exports = function (_fetch, _error) {
             })
     }
 
-    function editGroup(groupId, name, description) {
+    function editGroup(user, groupId, name, description) {
         let doc = {}
         if(name) doc.name = name
         if(description) doc.description = description
-        console.log(doc)
         const options = {
             method: "POST",
-            body: JSON.stringify({ doc: doc}),
+            body: JSON.stringify({ doc: doc }),
             headers: { 'Content-Type': 'application/json'}
         }
         const uri = uriManager.editGroupUri(groupId)
-        return makeRequest(uri, options, true)
+
+        return getGroup(user, groupId).then(makeRequest(uri, options, true)
             .then(body => {
                 if(body.error) {
                     return Promise.reject(error.get(10))
@@ -112,9 +115,10 @@ module.exports = function (_fetch, _error) {
                 return doc
             })
             .then(body => { debug(`edited group with id: ${body.id}`); return body; })
+        )
     }
 
-    function addSerieToGroup(groupId, serie) {
+    function addSerieToGroup(user, groupId, serie) {
         let script = {
             script: {
                 inline: "ctx._source.series.add(params.serie)",
@@ -129,7 +133,7 @@ module.exports = function (_fetch, _error) {
             body: JSON.stringify(script),
             headers: { 'Content-Type': 'application/json'}
         }
-        return makeRequest(uri, options, true)
+        return getGroup(user, groupId).then(makeRequest(uri, options, true)
             .then(body => {
                 if (body.error) {
                     return Promise.reject(error.get(10))
@@ -137,9 +141,10 @@ module.exports = function (_fetch, _error) {
                 return serie;
             })
             .then(serie => { debug(`added series with id: ${serie.id} to group with id: ${groupId}`); return serie; })
+        )
     }
 
-    function removeSeriesFromGroup(groupId, serieId) {
+    function removeSeriesFromGroup(user, groupId, serieId) {
         let script = {
             script: {
                 inline: `ctx._source.series.removeIf(serie -> serie.id == ${serieId})`,
@@ -153,7 +158,7 @@ module.exports = function (_fetch, _error) {
             body: JSON.stringify(script),
             headers: { 'Content-Type': 'application/json'}
         }
-        return makeRequest(uri, options, true)
+        return getGroup(user, groupId).then(makeRequest(uri, options, true)
             .then(body => {
                 if(body.error) {
                     return Promise.reject(error.get(10))
@@ -161,11 +166,12 @@ module.exports = function (_fetch, _error) {
                 return { serie: { id: serieId } };
             })
             .then(sid => { debug(`removed serie with id: ${serieId} from group with id: ${groupId}`); return sid; })
+        )
     }
     
-    async function findGroup(groupId) {
-        let groups = await getGroupListAll()
-        return findById(groupId, groups)
+    async function findGroup(user, groupId) {
+        let groups = await getGroupListAll(user)
+        return findById(user, groupId, groups)
     }
 
 
@@ -184,8 +190,8 @@ module.exports = function (_fetch, _error) {
         return body
     }
 
-    async function findById(id, array) {
-        let group = array.find(item => item.id == id)
+    async function findById(user, id, array) {
+        let group = array.find(item => (item.id == id && item.username == user.username))
         if (!group) return
         let series = await getGroup(id)
         return series

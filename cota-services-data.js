@@ -27,7 +27,7 @@ module.exports = function (_movieDb, _cotaDb, _error) {
     }
 
     function getGroupListAll(user) {
-        return cotaDb.getGroupListAll()
+        return cotaDb.getGroupListAll(user)
     }
 
     function addGroup(user, groupName, groupDesc) {
@@ -35,15 +35,15 @@ module.exports = function (_movieDb, _cotaDb, _error) {
             return Promise.reject(error.get(20))
         }
         
-        return cotaDb.addGroup(groupName, groupDesc)
+        return cotaDb.addGroup(user, groupName, groupDesc)
     }
 
     function getGroup(user, id) {
-        return cotaDb.getGroup(id)
+        return cotaDb.getGroup(user, id)
     }
 
     function editGroup(user, id, name, description) {
-        return cotaDb.editGroup(id, name, description)
+        return cotaDb.editGroup(user, id, name, description)
     }
 
     function addSerieToGroup(user, groupId, seriesId) {
@@ -56,13 +56,13 @@ module.exports = function (_movieDb, _cotaDb, _error) {
                     description: _serie.overview,
                     original_language: _serie.original_language
                 }
-                return cotaDb.addSerieToGroup(groupId, serie)
+                return cotaDb.addSerieToGroup(user, groupId, serie)
             })
         })
     }
 
     function removeSeriesFromGroup(user, groupId, seriesId) {
-        return cotaDb.removeSeriesFromGroup(groupId, seriesId)
+        return cotaDb.removeSeriesFromGroup(user, groupId, seriesId)
     }
 
     async function getGroupSeriesByVote(user, groupId, min = 0, max = 10) {
@@ -70,7 +70,7 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         if (isNaN(min) || isNaN(max) || isInvalidRange(min, max)) {
             return Promise.reject(error.get(22))
         }
-        const group = await cotaDb.findGroup(groupId)
+        const group = await cotaDb.findGroup(user, groupId)
         if(!group) {
             return Promise.reject(error.get(10))
         }

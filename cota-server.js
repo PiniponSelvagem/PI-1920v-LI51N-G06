@@ -37,8 +37,6 @@ app.use(cookieParser())
 app.use(passport.initialize())
 app.use(passport.session())
 
-//app.use(addLoginInformation)    //TODO remove when replaced with passport
-
 app.use('/cota/api/data', webApiDataRouter)
 app.use('/cota/api/auth', webApiAuthRouter)
 app.use('/', express.static('./public'))
@@ -47,17 +45,12 @@ app.listen(PORT, debug(`server listening on port ${PORT}`))
 
 
 function deserializeUser(user, done) {
-    debug("deserializeUser", user)
+    //debug("deserializeUser", user)
     done(null, user)
 }
   
   
 function serializeUser(user, done) {
-    debug("serializeUserCalled", user)
+    //debug("serializeUserCalled", user)
     done(null, user)
-}
-
-function addLoginInformation(req, rsp, next) {
-    req.user = req.cookies["Auth"];
-    next()
 }
