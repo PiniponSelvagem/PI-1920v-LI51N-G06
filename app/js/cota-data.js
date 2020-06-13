@@ -9,6 +9,7 @@ module.exports = {
     getSeriesByVote      : getSeriesByVote,
     deleteSerieFromGroup : deleteSerieFromGroup,
 
+    register    : register,
     login       : login,
     currentUser : currentUser,
     logout      : logout
@@ -35,6 +36,7 @@ function UriManager() {
     this.getDeleteSerieFromGroupUri = (groupId, serieId) => `${dataUri}series/group/${groupId}/series/${serieId}`
 
     const authUri = `http://${config.host}:${config.port}/${config.baseApi}/${config.auth}`
+    this.getRegisterUri = () => `${authUri}register`
     this.getLoginUri = () => `${authUri}login`
     this.getCurrentUserUri = () => `${authUri}currentuser`
     this.getLogoutUri = () => `${authUri}logout`
@@ -111,6 +113,20 @@ function deleteSerieFromGroup(groupId, serieId) {
 }
 
 
+function register(username, password) {
+    const credentials = {
+        username: username,
+        password: password
+    }
+
+    return fetch(uriManager.getRegisterUri(), {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(credentials)
+    }).then(rsp => rsp.json())
+}
 
 function login(username, password) {
     const credentials = {

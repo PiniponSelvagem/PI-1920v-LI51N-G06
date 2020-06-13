@@ -32,9 +32,10 @@ module.exports = function(cotaData) {
 
     function login() {
         mainContent.innerHTML = templates.login()
-        document.querySelector("#user-info").style.display = "none";
+        document.querySelector("#topnav").style.display = "none";
 
         document.querySelector("#btn-auth-login").onclick = doLogin
+        document.querySelector("#btn-auth-register").onclick = doRegister
 
         function doLogin() {
             const username = document.querySelector("#username").value
@@ -46,8 +47,28 @@ module.exports = function(cotaData) {
             function processLogin(loginStatus) {
                 if (loginStatus.ok) {
                     cotaData.currentUser().then(showCurrentUserInfo)
+                    document.querySelector("#topnav").style.display = "block";
+                    location.hash = "tvpopular"
+                }
+            }
+        }
+
+        function doRegister() {
+            const username = document.querySelector("#username").value
+            const password = document.querySelector("#password").value
+
+            cotaData.register(username, password)
+                .then(processRegister)
+
+            function processRegister(registerStatus) {
+                if (registerStatus.ok) {
+                    console.log("TODO: AUTH-CONTROLLER::LOGIN::doRegister")
+                    doLogin()
+                    /*
+                    cotaData.currentUser().then(showCurrentUserInfo)
                     document.querySelector("#user-info").style.display = "block";
                     location.hash = "tvpopular"
+                    */
                 }
             }
         }

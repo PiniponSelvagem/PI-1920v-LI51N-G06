@@ -21,7 +21,11 @@ module.exports = function (_cotaAuthServices, _error) {
 
     // POST .../register
     function register(req, rsp) {
+        const credentials = req.body
+        debug("REGISTERING USER: ", credentials)
         //cotaServices.addGroup(req.body.name, req.body.description).sendResponse(rsp, 201)
+        cotaAuthServices.register(credentials)
+            .sendResponse(rsp)
     }
 
     // POST .../login
@@ -33,6 +37,12 @@ module.exports = function (_cotaAuthServices, _error) {
 
         function addAuthCookie(loginStatus) {
             if (loginStatus.ok) {
+                /*
+                req.logIn({
+                    username: req.body.username
+                }, (err) => rsp.redirect('/home'))
+                return;
+                */
                 rsp.cookie(AUTH_COOKIE_NAME, credentials.username)
             }
             return loginStatus
@@ -53,6 +63,33 @@ module.exports = function (_cotaAuthServices, _error) {
             return Promise.resolve("User logged out")
         }
     }
+
+
+    /*
+    function validateLogin(req, rsp) {
+        if(validateUser(req.body.username, req.body.password)) {
+          console.log(req.body)
+          req.logIn({
+             username: req.body.username
+          }, (err) => rsp.redirect('/home'))
+          return;
+        }
+        else rsp.redirect('/login')
+      
+        function validateUser(){ return true; }
+    }
+      
+    function verifyAuthenticated(req, rsp, next) {
+        if(req.isAuthenticated())
+            return next()
+        rsp.status(403).send("Authenticate at '/login'")
+    }
+      
+    function logout(req, rsp) {
+        req.logOut()
+        rsp.redirect('/home')
+    }
+    */
 
 
     ///////////////////

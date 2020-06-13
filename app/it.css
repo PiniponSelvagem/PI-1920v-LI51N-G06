@@ -100,6 +100,28 @@ button:hover {
 }
 
 
+#authentication {
+    margin: auto;
+    width: 10%;
+    text-align: center;
+    background-color: #ddd;
+    box-shadow: 0 0 10px #888888;
+}
+#authentication button{
+    margin: 18pt 0pt;
+    width: 38%
+}
+#authentication input{
+    margin: 4pt 0pt
+}
+#authentication #logo {
+    filter: brightness(0%);
+    width: 80pt;
+    margin: 10pt 10pt 10pt
+}
+
+
+
 table  {
     border-collapse: collapse;
 }
@@ -142,6 +164,7 @@ table button[id^="btn-add"]:hover {
     background-color: #4CAF50;
     color: white;
 }
+
 
 div[class^="data"] span {
     display: inline-block;
