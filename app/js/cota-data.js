@@ -68,34 +68,16 @@ function getGroup(id) {
 }
 
 function createGroup(group) {
-    return fetch(uriManager.getAddGroupUri(), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(group)
-    }).then(rsp => rsp.json())
+    return doPost(uriManager.getAddGroupUri(), group)
 }
 
 function editGroup(id, group) {
-    return fetch(uriManager.getEditGroupUri(id), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(group)
-    }).then(rsp => rsp.json())
+    return doPost(uriManager.getEditGroupUri(id), group)
 }
 
 function addSerieToGroup(groupId, serieId) {
     const serie = { id: serieId }
-    return fetch(uriManager.getSerieAddGroupUri(groupId), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(serie)
-    }).then(rsp => rsp.json())
+    return doPost(uriManager.getSerieAddGroupUri(groupId), serie)
 }
 
 function getSeriesByVote(groupId, voteRange) {
@@ -113,19 +95,14 @@ function deleteSerieFromGroup(groupId, serieId) {
 }
 
 
+
 function register(username, password) {
     const credentials = {
         username: username,
         password: password
     }
 
-    return fetch(uriManager.getRegisterUri(), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(credentials)
-    }).then(rsp => rsp.json())
+    return doPost(uriManager.getRegisterUri(), credentials)
 }
 
 function login(username, password) {
@@ -133,14 +110,8 @@ function login(username, password) {
         username: username,
         password: password
     }
-
-    return fetch(uriManager.getLoginUri(), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(credentials)
-    }).then(rsp => rsp.json())
+    
+    return doPost(uriManager.getLoginUri(), credentials)
 }
 
 function currentUser() {
@@ -149,10 +120,20 @@ function currentUser() {
 }
 
 function logout() {
-    return fetch(uriManager.getLogoutUri(), {
+    return doPost(uriManager.getLogoutUri())
+}
+
+
+
+///////////////////
+// AUX functions //
+///////////////////
+function doPost(uri, data) {
+    return fetch(uri, {
         method: "POST",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
         },
+        body: JSON.stringify(data)
     }).then(rsp => rsp.json())
 }

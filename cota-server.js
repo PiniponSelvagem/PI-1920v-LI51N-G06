@@ -37,7 +37,7 @@ app.use(
         }
     )
 )
-app.use(addLoginInformation)    //TODO remove when replaced with passport
+//app.use(addLoginInformation)    //TODO remove when replaced with passport
 
 app.use('/cota/api/data', webApiDataRouter)
 app.use('/cota/api/auth', webApiAuthRouter)

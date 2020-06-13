@@ -25,7 +25,7 @@ module.exports = function (_cotaAuthDb, _error) {
 
     function logout() {
         // TODO
-        return Promise.resolve(true)
+        return Promise.resolve({ok: true})
     }
 
     /*

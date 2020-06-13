@@ -1,19 +1,18 @@
-module.exports = function(cotaData) {
+module.exports = function(cotaData, context) {
     const mainContent = document.querySelector("#main-content")
     const userInfoNavBar = document.querySelector("#user-info")
     const templates = require('./templates')
 
-    cotaData.currentUser().then(showCurrentUserInfo)
+    Promise.resolve(context.user).then(showCurrentUserInfo)
 
     return states = {
         login  : login,
         logout : logout
     }
 
-    function showCurrentUserInfo(user) {
-        const userInfo = { username: user.user }
-        if (userInfo.username) {
-            userInfoNavBar.innerHTML = templates.user_loggedin(userInfo)
+    function showCurrentUserInfo(username) {
+        if (username) {
+            userInfoNavBar.innerHTML = templates.user_loggedin(username)
             document.querySelector("#btn-navbar-logout").onclick = goToLogout
         }
         else {
@@ -45,8 +44,9 @@ module.exports = function(cotaData) {
                 .then(processLogin)
 
             function processLogin(loginStatus) {
+                context.user = { username: loginStatus.username }
                 if (loginStatus.ok) {
-                    cotaData.currentUser().then(showCurrentUserInfo)
+                    Promise.resolve(context.user).then(showCurrentUserInfo)
                     document.querySelector("#topnav").style.display = "block";
                     location.hash = "tvpopular"
                 }
@@ -79,7 +79,8 @@ module.exports = function(cotaData) {
             .then(processLogout)
 
         function processLogout() {
-            cotaData.currentUser().then(showCurrentUserInfo)
+            context.user = undefined
+            showCurrentUserInfo(context.user)
             location.hash = "tvpopular"
         }
     }

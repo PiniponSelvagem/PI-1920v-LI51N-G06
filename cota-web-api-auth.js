@@ -6,7 +6,7 @@ module.exports = function (_cotaAuthServices, _error) {
     const cotaAuthServices = _cotaAuthServices
     const error = _error
 
-    const AUTH_COOKIE_NAME = "Auth"
+    //const AUTH_COOKIE_NAME = "Auth"
 
     router.post('/register', register)
     router.post('/login', login)
@@ -37,30 +37,32 @@ module.exports = function (_cotaAuthServices, _error) {
 
         function addAuthCookie(loginStatus) {
             if (loginStatus.ok) {
-                /*
                 req.logIn({
                     username: req.body.username
-                }, (err) => rsp.redirect('/home'))
-                return;
-                */
-                rsp.cookie(AUTH_COOKIE_NAME, credentials.username)
+                }, (err) => rsp.json(loginStatus))
+                //rsp.cookie(AUTH_COOKIE_NAME, credentials.username)
             }
             return loginStatus
         }
     }
 
-    // GET .../login
+    // GET .../currentuser
     function currentUser(req, rsp) {
         Promise.resolve({user: req.user}).sendResponse(rsp)
     }
 
     // POST .../logout
     function logout(req, rsp) {
-        cotaAuthServices.logout().then(removeAuthCookie).sendResponse(rsp)
+        cotaAuthServices.logout()
+            .then(removeAuthCookie)
+            .sendResponse(rsp)
 
-        function removeAuthCookie() {
-            rsp.clearCookie(AUTH_COOKIE_NAME)
-            return Promise.resolve("User logged out")
+        function removeAuthCookie(logoutStatus) {
+            if (logoutStatus.ok) {
+                req.logOut({}, (err) => rsp.json(logoutStatus))
+                //rsp.clearCookie(AUTH_COOKIE_NAME)
+            }
+            return logoutStatus
         }
     }
 
@@ -111,7 +113,7 @@ module.exports = function (_cotaAuthServices, _error) {
     function processResponse(rsp, statusCodeSup) {
         return function(data) {
             rsp.statusCode = statusCodeSup(data)
-            rsp.setHeader("Content-Type", "application/json")
+            //rsp.setHeader("Content-Type", "application/json")
             rsp.end(JSON.stringify(data))
         }
     }

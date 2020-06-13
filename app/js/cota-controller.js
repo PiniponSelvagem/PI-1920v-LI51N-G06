@@ -1,4 +1,4 @@
-module.exports = function(cotaData) {
+module.exports = function(cotaData, context) {
     const mainContent = document.querySelector("#main-content")
     const templates = require('./templates')
 
@@ -74,7 +74,7 @@ module.exports = function(cotaData) {
         function editGroup() {
             const groupId = window.location.hash.substring(1).split("/")[1]
             let group = { }
-            document.querySelectorAll(".group-data input")
+            document.querySelectorAll(".data-group input")
                 .forEach(input => group[input.id] = input.value)
             
             cotaData.editGroup(id, group)
@@ -86,7 +86,7 @@ module.exports = function(cotaData) {
                 id: window.location.hash.substring(1).split("/")[1]
             }
             let voteRange = { }
-            document.querySelectorAll(".seriebyvote-data input")
+            document.querySelectorAll(".data-seriesbyvote input")
                 .forEach(input => voteRange[input.id] = input.value)
 
             cotaData.getSeriesByVote(group.id, voteRange)

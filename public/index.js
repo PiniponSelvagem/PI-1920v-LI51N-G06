@@ -134,22 +134,21 @@ module.exports = content.locals || {};
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = function(cotaData) {
+module.exports = function(cotaData, context) {
     const mainContent = document.querySelector("#main-content")
     const userInfoNavBar = document.querySelector("#user-info")
     const templates = __webpack_require__(/*! ./templates */ "./js/templates.js")
 
-    cotaData.currentUser().then(showCurrentUserInfo)
+    Promise.resolve(context.user).then(showCurrentUserInfo)
 
     return states = {
         login  : login,
         logout : logout
     }
 
-    function showCurrentUserInfo(user) {
-        const userInfo = { username: user.user }
-        if (userInfo.username) {
-            userInfoNavBar.innerHTML = templates.user_loggedin(userInfo)
+    function showCurrentUserInfo(username) {
+        if (username) {
+            userInfoNavBar.innerHTML = templates.user_loggedin(username)
             document.querySelector("#btn-navbar-logout").onclick = goToLogout
         }
         else {
@@ -181,8 +180,9 @@ module.exports = function(cotaData) {
                 .then(processLogin)
 
             function processLogin(loginStatus) {
+                context.user = { username: loginStatus.username }
                 if (loginStatus.ok) {
-                    cotaData.currentUser().then(showCurrentUserInfo)
+                    Promise.resolve(context.user).then(showCurrentUserInfo)
                     document.querySelector("#topnav").style.display = "block";
                     location.hash = "tvpopular"
                 }
@@ -215,7 +215,8 @@ module.exports = function(cotaData) {
             .then(processLogout)
 
         function processLogout() {
-            cotaData.currentUser().then(showCurrentUserInfo)
+            context.user = undefined
+            showCurrentUserInfo(context.user)
             location.hash = "tvpopular"
         }
     }
@@ -230,7 +231,7 @@ module.exports = function(cotaData) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = function(cotaData) {
+module.exports = function(cotaData, context) {
     const mainContent = document.querySelector("#main-content")
     const templates = __webpack_require__(/*! ./templates */ "./js/templates.js")
 
@@ -306,7 +307,7 @@ module.exports = function(cotaData) {
         function editGroup() {
             const groupId = window.location.hash.substring(1).split("/")[1]
             let group = { }
-            document.querySelectorAll(".group-data input")
+            document.querySelectorAll(".data-group input")
                 .forEach(input => group[input.id] = input.value)
             
             cotaData.editGroup(id, group)
@@ -318,7 +319,7 @@ module.exports = function(cotaData) {
                 id: window.location.hash.substring(1).split("/")[1]
             }
             let voteRange = { }
-            document.querySelectorAll(".seriebyvote-data input")
+            document.querySelectorAll(".data-seriesbyvote input")
                 .forEach(input => voteRange[input.id] = input.value)
 
             cotaData.getSeriesByVote(group.id, voteRange)
@@ -447,34 +448,16 @@ function getGroup(id) {
 }
 
 function createGroup(group) {
-    return fetch(uriManager.getAddGroupUri(), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(group)
-    }).then(rsp => rsp.json())
+    return doPost(uriManager.getAddGroupUri(), group)
 }
 
 function editGroup(id, group) {
-    return fetch(uriManager.getEditGroupUri(id), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(group)
-    }).then(rsp => rsp.json())
+    return doPost(uriManager.getEditGroupUri(id), group)
 }
 
 function addSerieToGroup(groupId, serieId) {
     const serie = { id: serieId }
-    return fetch(uriManager.getSerieAddGroupUri(groupId), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(serie)
-    }).then(rsp => rsp.json())
+    return doPost(uriManager.getSerieAddGroupUri(groupId), serie)
 }
 
 function getSeriesByVote(groupId, voteRange) {
@@ -492,19 +475,14 @@ function deleteSerieFromGroup(groupId, serieId) {
 }
 
 
+
 function register(username, password) {
     const credentials = {
         username: username,
         password: password
     }
 
-    return fetch(uriManager.getRegisterUri(), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(credentials)
-    }).then(rsp => rsp.json())
+    return doPost(uriManager.getRegisterUri(), credentials)
 }
 
 function login(username, password) {
@@ -512,14 +490,8 @@ function login(username, password) {
         username: username,
         password: password
     }
-
-    return fetch(uriManager.getLoginUri(), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(credentials)
-    }).then(rsp => rsp.json())
+    
+    return doPost(uriManager.getLoginUri(), credentials)
 }
 
 function currentUser() {
@@ -528,11 +500,21 @@ function currentUser() {
 }
 
 function logout() {
-    return fetch(uriManager.getLogoutUri(), {
+    return doPost(uriManager.getLogoutUri())
+}
+
+
+
+///////////////////
+// AUX functions //
+///////////////////
+function doPost(uri, data) {
+    return fetch(uri, {
         method: "POST",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
         },
+        body: JSON.stringify(data)
     }).then(rsp => rsp.json())
 }
 
@@ -546,9 +528,10 @@ function logout() {
 /***/ (function(module, exports, __webpack_require__) {
 
 window.onload = function (e) {
+    let context = {}
     const cotaData = __webpack_require__(/*! ./cota-data */ "./js/cota-data.js")
-    const authStates = __webpack_require__(/*! ./auth-controller */ "./js/auth-controller.js")(cotaData)
-    const cotaStates = __webpack_require__(/*! ./cota-controller */ "./js/cota-controller.js")(cotaData)
+    const authStates = __webpack_require__(/*! ./auth-controller */ "./js/auth-controller.js")(cotaData, context)
+    const cotaStates = __webpack_require__(/*! ./cota-controller */ "./js/cota-controller.js")(cotaData, context)
 
     const states = Object.assign(authStates, cotaStates)
     __webpack_require__(/*! ./state-router */ "./js/state-router.js")(states, "tvpopular")
@@ -634,7 +617,7 @@ module.exports = {
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ./node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, "body {\r\n    margin: 0;\r\n    font-family: Helvetica;\r\n}\r\n\r\n\r\n.topnav {\r\n    overflow: hidden;\r\n    background-color: #333;\r\n    box-shadow: 0px 5px 5px #888888;\r\n    position: fixed;\r\n    top: 0;\r\n    width: 100%;\r\n}\r\n.topnav a {\r\n    float: left;\r\n    color: #f2f2f2;\r\n    text-align: center;\r\n    padding: 10pt 14pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav a:hover {\r\n    background-color: #ddd;\r\n    color: black;\r\n}\r\n.topnav a.active {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n#logo {\r\n    float: left;\r\n    padding: 10pt 10pt;\r\n    padding-left: 20pt;\r\n    width: 40px;\r\n}\r\n\r\n\r\n.searchbar {\r\n    float: left;\r\n    padding: 2pt 10pt;\r\n}\r\n.searchbar input {\r\n    float: left;\r\n    color: #333;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav button {\r\n    float: center;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    padding: 3pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 13pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n}\r\n.topnav button:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n.userinfo {\r\n    float: right;\r\n    padding: 2pt 20pt;\r\n}\r\n.userinfo label {\r\n    padding: 8pt 20pt;\r\n    color: #f2f2f2;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n\r\n\r\n.content {\r\n    margin: 10pt;\r\n    margin-top: 50pt;\r\n}\r\n\r\n\r\nbutton {\r\n    float: center;\r\n    text-align: center;\r\n    padding: 2pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 10pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n    background-color: #666;\r\n    color: white;\r\n}\r\nbutton:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n#authentication {\r\n    margin: auto;\r\n    width: 10%;\r\n    text-align: center;\r\n    background-color: #ddd;\r\n    box-shadow: 0 0 10px #888888;\r\n}\r\n#authentication button{\r\n    margin: 18pt 0pt;\r\n    width: 38%\r\n}\r\n#authentication input{\r\n    margin: 4pt 0pt\r\n}\r\n#authentication #logo {\r\n    filter: brightness(0%);\r\n    width: 80pt;\r\n    margin: 10pt 10pt 10pt\r\n}\r\n\r\n\r\n\r\ntable  {\r\n    border-collapse: collapse;\r\n}\r\ntable td, table th {\r\n    border: 1px solid #ddd;\r\n    padding: 8px;\r\n}\r\ntable tr:nth-child(even) {\r\n    background-color: #f2f2f2;\r\n}\r\ntable tr:hover {\r\n    background-color: #ddd;\r\n}\r\ntable th {\r\n    padding-top: 12px;\r\n    padding-bottom: 12px;\r\n    text-align: left;\r\n    background-color: #ffb400;\r\n    color: black;\r\n}\r\ntable a {\r\n    text-decoration: none;\r\n}\r\ntable button {\r\n    padding: 9px 10px;\r\n}\r\ntable button[id^=\"btn-delete\"] {\r\n    background-color: #9e1800;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-delete\"]:hover {\r\n    background-color: #FF0000;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"] {\r\n    background-color: #38823b;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"]:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\ndiv[class^=\"data\"] span {\r\n    display: inline-block;\r\n    width: 20ex\r\n}", ""]);
+exports.push([module.i, "body {\r\n    margin: 0;\r\n    font-family: Helvetica;\r\n}\r\n\r\n\r\n.topnav {\r\n    overflow: hidden;\r\n    background-color: #333;\r\n    box-shadow: 0px 5px 5px #888888;\r\n    position: fixed;\r\n    top: 0;\r\n    width: 100%;\r\n}\r\n.topnav a {\r\n    float: left;\r\n    color: #f2f2f2;\r\n    text-align: center;\r\n    padding: 10pt 14pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav a:hover {\r\n    background-color: #ddd;\r\n    color: black;\r\n}\r\n.topnav a.active {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n#logo {\r\n    float: left;\r\n    padding: 10pt 10pt;\r\n    padding-left: 20pt;\r\n    width: 40px;\r\n}\r\n\r\n\r\n.searchbar {\r\n    float: left;\r\n    padding: 2pt 10pt;\r\n}\r\n.searchbar input {\r\n    float: left;\r\n    color: #333;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n.topnav button {\r\n    float: center;\r\n    text-align: center;\r\n    margin-top: 5pt;\r\n    padding: 3pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 13pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n}\r\n.topnav button:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n.userinfo {\r\n    float: right;\r\n    padding: 2pt 20pt;\r\n}\r\n.userinfo label {\r\n    padding: 8pt 20pt;\r\n    color: #f2f2f2;\r\n    text-decoration: none;\r\n    font-size: 14pt;\r\n}\r\n\r\n\r\n.content {\r\n    margin: 10pt;\r\n    margin-top: 50pt;\r\n}\r\n\r\n\r\nbutton {\r\n    float: center;\r\n    text-align: center;\r\n    padding: 2pt 10pt;\r\n    text-decoration: none;\r\n    font-size: 10pt;\r\n    border: 0pt;\r\n    cursor: pointer;\r\n    background-color: #666;\r\n    color: white;\r\n}\r\nbutton:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\n#authentication {\r\n    margin: auto;\r\n    width: 140pt;\r\n    text-align: center;\r\n    background-color: #ddd;\r\n    box-shadow: 0 0 10px #888888;\r\n}\r\n#authentication button{\r\n    margin: 18pt 0pt;\r\n    width: 38%\r\n}\r\n#authentication input{\r\n    margin: 4pt 0pt\r\n}\r\n#authentication #logo {\r\n    filter: brightness(0%);\r\n    width: 80pt;\r\n    margin: 10pt 10pt 10pt\r\n}\r\n\r\n\r\n\r\ntable  {\r\n    border-collapse: collapse;\r\n}\r\ntable td, table th {\r\n    border: 1px solid #ddd;\r\n    padding: 8px;\r\n}\r\ntable tr:nth-child(even) {\r\n    background-color: #f2f2f2;\r\n}\r\ntable tr:hover {\r\n    background-color: #ddd;\r\n}\r\ntable th {\r\n    padding-top: 12px;\r\n    padding-bottom: 12px;\r\n    text-align: left;\r\n    background-color: #ffb400;\r\n    color: black;\r\n}\r\ntable a {\r\n    text-decoration: none;\r\n}\r\ntable button {\r\n    padding: 9px 10px;\r\n}\r\ntable button[id^=\"btn-delete\"] {\r\n    background-color: #9e1800;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-delete\"]:hover {\r\n    background-color: #FF0000;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"] {\r\n    background-color: #38823b;\r\n    color: white;\r\n}\r\ntable button[id^=\"btn-add\"]:hover {\r\n    background-color: #4CAF50;\r\n    color: white;\r\n}\r\n\r\n\r\ndiv[class^=\"data\"] span {\r\n    display: inline-block;\r\n    width: 20ex\r\n}", ""]);
 // Exports
 module.exports = exports;
 
@@ -6171,7 +6154,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = ("<table id=\"series-table\"> \r\n    <thead>\r\n        <tr>\r\n            <td>Name</td>\r\n            <td>Original Name</td>\r\n            <td>Vote Average</td>\r\n        </tr>\r\n    </thead>\r\n    <tbody id=\"items\">\r\n        {{#each series}}\r\n        <tr>\r\n            <td>{{name}}</td>\r\n            <td>{{original_name}}</td>\r\n            <td>{{vote_average}}</td>\r\n        </tr>\r\n        {{/each}}\r\n    </tbody>\r\n</table>");
+/* harmony default export */ __webpack_exports__["default"] = ("<table id=\"series-table\"> \r\n    <thead>\r\n        <tr>\r\n            <th>Name</th>\r\n            <th>Original Name</th>\r\n            <th>Vote Average</th>\r\n        </tr>\r\n    </thead>\r\n    <tbody id=\"items\">\r\n        {{#each series}}\r\n        <tr>\r\n            <td>{{name}}</td>\r\n            <td>{{original_name}}</td>\r\n            <td>{{vote_average}}</td>\r\n        </tr>\r\n        {{/each}}\r\n    </tbody>\r\n</table>");
 
 /***/ }),
 
