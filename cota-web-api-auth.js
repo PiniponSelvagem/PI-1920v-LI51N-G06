@@ -31,7 +31,6 @@ module.exports = function (_cotaAuthServices, _error) {
             .sendResponse(rsp)
 
         function validateUser(loginStatus) {
-            console.log(loginStatus)
             if (loginStatus.ok) {
                 req.logIn({
                     username: req.body.username
@@ -43,7 +42,6 @@ module.exports = function (_cotaAuthServices, _error) {
 
     // POST .../logout
     function logout(req, rsp) {
-        console.log(req.isAuthenticated(), req.user)
         cotaAuthServices.logout()
             .then(logoutUser)
             .sendResponse(rsp)

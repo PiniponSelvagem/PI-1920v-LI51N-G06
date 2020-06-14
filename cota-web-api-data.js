@@ -32,38 +32,51 @@ module.exports = function (_cotaDataServices, _error) {
 
     // GET .../series/group/list
     function getGroupListAll(req, rsp) {
-        req.isAuthenticated() ?
-            cotaDataServices.getGroupListAll(req.user).sendResponse(rsp) : Promise.resolve(error.get(60)).sendResponse(rsp)
+        req.isAuthenticated()
+            ? cotaDataServices.getGroupListAll(req.user).sendResponse(rsp)
+            : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 
     // POST .../series/group
     function addGroup(req, rsp) {
-        cotaDataServices.addGroup(req.user, req.body.name, req.body.description).sendResponse(rsp, 201)
+        req.isAuthenticated()
+            ? cotaDataServices.addGroup(req.user, req.body.name, req.body.description).sendResponse(rsp, 201)
+            : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 
     // GET .../series/group/:gid
     function getGroup(req, rsp) {
-        cotaDataServices.getGroup(req.user, req.params.gid).sendResponse(rsp)
+        req.isAuthenticated()
+            ? cotaDataServices.getGroup(req.user, req.params.gid).sendResponse(rsp)
+            : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 
     // POST .../series/group/:gid
     function editGroup(req, rsp) {
-        cotaDataServices.editGroup(req.user, req.params.gid, req.body.name, req.body.description).sendResponse(rsp)
+        req.isAuthenticated()
+            ? cotaDataServices.editGroup(req.user, req.params.gid, req.body.name, req.body.description).sendResponse(rsp)
+            : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 
     // POST .../series/group/:gid/series
     function addSerieToGroup(req, rsp) {
-        cotaDataServices.addSerieToGroup(req.user, req.params.gid, req.body.id).sendResponse(rsp, 201)
+        req.isAuthenticated()
+            ? cotaDataServices.addSerieToGroup(req.user, req.params.gid, req.body.id).sendResponse(rsp, 201)
+            : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 
     // DELETE .../series/group/:gid/series/:sid
     function removeSeriesFromGroup(req, rsp) {
-        cotaDataServices.removeSeriesFromGroup(req.user, req.params.gid, req.params.sid).sendResponse(rsp)
+        req.isAuthenticated()
+            ? cotaDataServices.removeSeriesFromGroup(req.user, req.params.gid, req.params.sid).sendResponse(rsp)
+            : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 
     // GET .../series/group/:gid/series
     function getGroupSeriesByVote(req, rsp) {
-        cotaDataServices.getGroupSeriesByVote(req.user, req.params.gid, req.query.min, req.query.max).sendResponse(rsp)
+        req.isAuthenticated()
+            ? cotaDataServices.getGroupSeriesByVote(req.user, req.params.gid, req.query.min, req.query.max).sendResponse(rsp)
+            : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 
 

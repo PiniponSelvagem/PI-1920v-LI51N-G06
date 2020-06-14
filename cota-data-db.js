@@ -191,9 +191,9 @@ module.exports = function (_fetch, _error) {
     }
 
     async function findById(user, id, array) {
-        let group = array.find(item => (item.id == id && item.username == user.username))
+        let group = array.find(item => (item.id == id))
         if (!group) return
-        let series = await getGroup(id)
+        let series = await getGroup(user, id)
         return series
     }
 }

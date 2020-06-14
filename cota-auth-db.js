@@ -1,5 +1,5 @@
 
-const debug = require('debug')('cota:data-db')
+const debug = require('debug')('cota:auth-db')
 
 const config = {
     host: 'localhost',
@@ -28,7 +28,6 @@ module.exports = function (_fetch, _error) {
     function getUser(credentials) {
         return makeRequest(uriManager.getUserUri(credentials.username))
             .then(rsp => {
-                console.log(rsp)
                 if(rsp.error || rsp.hits.total.value == 0) {
                     return Promise.reject(error.get(80))
                 }
@@ -68,7 +67,6 @@ module.exports = function (_fetch, _error) {
         return makeRequest(uriManager.addUserUri(), setPostOptions(credentials))
             .then(rsp => {
                     if (rsp.result == "created") {
-                        console.log("created")
                         const userOutput = {
                             username: credentials.username
                         }
