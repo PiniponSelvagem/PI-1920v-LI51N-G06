@@ -4,7 +4,9 @@
   "description": "Chelas Open TV Application",
   "main": "cota-server.js",
   "scripts": {
-    "test": "set DEBUG=cota:* & nodemon cota-server.js",
+    "test": "node ./test/cota-server-test.js",
+    "devmode": "set DEBUG=cota:* & nodemon cota-server.js",
+    "debug": "set DEBUG=cota:* & node cota-server.js",
     "start": "node cota-server.js"
   },
   "author": "PI-1920v-LI51N-G06",

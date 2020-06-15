@@ -8,6 +8,7 @@ module.exports = function (_cotaAuthServices, _error) {
 
     router.post('/register', register)
     router.post('/login', login)
+    router.get('/currentUser', currentUser)
     router.post('/logout', logout)
 
     
@@ -38,6 +39,11 @@ module.exports = function (_cotaAuthServices, _error) {
             }
             return loginStatus
         }
+    }
+
+    // GET ../currentuser
+    function currentUser(req, rsp) {
+        Promise.resolve({user: req.user}).sendResponse(rsp)
     }
 
     // POST .../logout

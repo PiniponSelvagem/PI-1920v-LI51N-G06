@@ -9,10 +9,10 @@ module.exports = {
     getSeriesByVote      : getSeriesByVote,
     deleteSerieFromGroup : deleteSerieFromGroup,
 
-    register    : register,
-    login       : login,
-    //currentUser : currentUser,
-    logout      : logout
+    register       : register,
+    login          : login,
+    getCurrentUser : getCurrentUser,
+    logout         : logout
 }
 
 function UriManager() {
@@ -38,6 +38,7 @@ function UriManager() {
     const authUri = `http://${config.host}:${config.port}/${config.baseApi}/${config.auth}`
     this.getRegisterUri = () => `${authUri}register`
     this.getLoginUri = () => `${authUri}login`
+    this.getCurrentUserUri = () => `${authUri}currentuser`
     this.getLogoutUri = () => `${authUri}logout`
 }
 
@@ -111,6 +112,11 @@ function login(username, password) {
     }
     
     return doPost(uriManager.getLoginUri(), credentials)
+}
+
+function getCurrentUser() {
+    return fetch(uriManager.getCurrentUserUri())
+        .then(rsp => rsp.json())
 }
 
 function logout() {

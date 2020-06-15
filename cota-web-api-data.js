@@ -81,17 +81,8 @@ module.exports = function (_cotaDataServices, _error) {
 
 
     ///////////////////
-    // AUX functions //   // NOTE: THIS CODE IS COMMON TO MODULE: cota-web-api-users
+    // AUX functions //
     ///////////////////
-    function sendAuthenticatedResponse(response) {
-        if (!req.isAuthenticated()) {
-            Promise.reject(error.get(60)).sendResponse(rsp)
-        }
-        else {
-            response()
-        }
-    }
-
     function sendResponse(rsp, successStatusCode = 200, errorStatusCode = 500) {
         this.then(processSuccess(rsp, successStatusCode)).catch(processError(rsp, errorStatusCode))
     }

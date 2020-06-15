@@ -1,11 +1,13 @@
-const { template } = require('handlebars')
-
 module.exports = function(cotaData, context) {
     const mainContent = document.querySelector("#main-content")
     const userInfoNavBar = document.querySelector("#user-info")
     const templates = require('./templates')
-
-    Promise.resolve(context.user).then(showCurrentUserInfo)
+    
+    
+    // In case session is valid, but user refreshed the page. Show user name at user info.
+    cotaData.getCurrentUser()
+        .then(rsp => {context.user = rsp.user; return context.user})
+        .then(showCurrentUserInfo)
 
     return states = {
         login  : login,
