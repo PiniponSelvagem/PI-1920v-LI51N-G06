@@ -1,7 +1,6 @@
-module.exports = function(cotaData, context) {
+module.exports = function(cotaData, templates, context) {
     const mainContent = document.querySelector("#main-content")
     const userInfoNavBar = document.querySelector("#user-info")
-    const templates = require('./templates')
     
     
     // In case session is valid, but user refreshed the page. Show user name at user info.

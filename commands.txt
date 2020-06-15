@@ -23,3 +23,7 @@ npm install -g --save-dev webpack-cli
 npm install --save-dev webpack html-webpack-plugin style-loader css-loader raw-loader url-loader handlebars copy-webpack-plugin
 
 npm run-script build
+
+-------------------------------------------
+
+npm install --save-dev mocha

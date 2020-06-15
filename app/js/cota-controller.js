@@ -1,6 +1,5 @@
-module.exports = function(cotaData, context) {
+module.exports = function(cotaData, templates, context) {
     const mainContent = document.querySelector("#main-content")
-    const templates = require('./templates')
 
     return states = {
         tvpopular          : showTvPopular,

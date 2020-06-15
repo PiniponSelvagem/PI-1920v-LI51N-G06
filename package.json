@@ -4,7 +4,7 @@
   "description": "Chelas Open TV Application",
   "main": "cota-server.js",
   "scripts": {
-    "test": "node ./test/cota-server-test.js",
+    "test": "mocha",
     "devmode": "set DEBUG=cota:* & nodemon cota-server.js",
     "debug": "set DEBUG=cota:* & node cota-server.js",
     "start": "node cota-server.js"
@@ -16,8 +16,10 @@
     "debug": "^4.1.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
-    "mocha": "^7.1.1",
     "node-fetch": "^2.6.0",
     "passport": "^0.4.1"
+  },
+  "devDependencies": {
+    "mocha": "^8.0.1"
   }
 }

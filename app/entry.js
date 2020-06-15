@@ -1,2 +1,2 @@
-require('./it.css')
+require('./cota.css')
 require('./js/main')
