@@ -47,7 +47,7 @@ module.exports = function (_fetch, _error) {
 
     async function addUser(credentials) {        
         // check if user exists
-        await makeRequest(uriManager.getUserUri(), credentials.username)
+        await makeRequest(uriManager.getUserUri(credentials.username))
             .then(rsp => {
                     if (rsp.error) {    // elasticsearch not created
                         /*
@@ -89,7 +89,6 @@ module.exports = function (_fetch, _error) {
         debug(`request to (ElasticSearch) ${uri}`)
         const body = await fetch(uri, options)
             .then(rsp => rsp.json())
-        
 
         if (refresh) {
             await fetch(uriManager.refresh())

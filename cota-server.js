@@ -4,7 +4,6 @@ const PORT = 8080
 const debug = require('debug')('cota:server')
 const express = require('express')
 const fetch = require('node-fetch')
-const cookieParser = require('cookie-parser')
 const passport = require('passport') 
 const expressSession = require('express-session');
 
@@ -33,7 +32,6 @@ app.use(
 )
 
 app.use(express.json())
-app.use(cookieParser())
 app.use(passport.initialize())
 app.use(passport.session())
 
