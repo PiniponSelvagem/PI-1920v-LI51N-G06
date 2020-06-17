@@ -1,14 +1,14 @@
 
 const debug = require('debug')('cota:auth-db')
 
-const config = {
+const _config = {
     host: 'localhost',
     port: 9200,
     index: "cota_users",
     //max_results: 1000 // max results returned by elasticsearch -> DEFAULT: 10
 }
 
-module.exports = function (_fetch, _error) {
+module.exports = function (_fetch, _error, config = _config) {
     const fetch = _fetch
     const error = _error
     const uriManager = new UriManager()
