@@ -1,17 +1,8 @@
-
 const debug = require('debug')('cota:data-db')
 
-const _config = {
-    host: 'localhost',
-    port: 9200,
-    index: "cota",
-    max_results: 1000 // max results returned by elasticsearch -> DEFAULT: 10
-}
 
-module.exports = function (_fetch, _error, config = _config) {
-    const fetch = _fetch
+module.exports = function (dbFile, _error) {
     const error = _error
-    const uriManager = new UriManager()
 
     return {
         getGroupListAll       : getGroupListAll,
@@ -23,29 +14,17 @@ module.exports = function (_fetch, _error, config = _config) {
         findGroup             : findGroup
     }
 
-    function UriManager() {
-        const baseUri = `http://${config.host}:${config.port}/${config.index}/`
-        this.getGroupListAllUri = (username) => `${baseUri}_search?q=username:${username}&size=${config.max_results}`
-        this.addGroupUri = () => `${baseUri}_doc`
-        this.getGroupUri = (id) => `${baseUri}_doc/${id}`
-        this.editGroupUri = (id) => `${baseUri}_doc/${id}/_update`
-        this.addSerieToGroupUri = (id) => `${baseUri}_doc/${id}/_update`
-        this.removeSeriesFromGroupUri = (id) => `${baseUri}_doc/${id}/_update`
-        this.refresh = () => `${baseUri}_refresh`
-    }
-
     function getGroupListAll(user) {
-        const uri = uriManager.getGroupListAllUri(user.username)
-        return makeRequest(uri)
-            .then(body => body.hits.hits.map(
-                group => {
+        return Promise.resolve(
+            dbFile
+                .filter( group => group.user === user.username)
+                .map( group => {
                     return {
-                        id: group._id,
-                        name: group._source.name,
-                        description: group._source.description
+                        id: group.id,
+                        name: group.name,
+                        description: group.description
                     }
-                }))
-            .then(body => { debug(`getGroupListAll found ${body.length} groups`); return body; })
+            }))
     }
 
     function addGroup(user, groupName, groupDesc) {

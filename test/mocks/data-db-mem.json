@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "user": "testUser1",
+    "name": "testGroup1",
+    "description": "this is group 1",
+    "series": [
+      {
+        "id": 1,
+        "original_name": "serie1",
+        "name": "s1"
+      },
+      {
+        "id": 2,
+        "original_name": "serie2",
+        "name": "s2"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "user": "testUser1",
+    "name": "testGroup2",
+    "description": "this is group 2",
+    "series": [
+      {
+        "id": 4,
+        "original_name": "serie4",
+        "name": "s4"
+      },
+      {
+        "id": 5,
+        "original_name": "serie5",
+        "name": "s5"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "user": "testUser2",
+    "name": "testGroup3",
+    "description": "this is group 3",
+    "series": [
+      {
+        "id": 3,
+        "original_name": "serie3",
+        "name": "s3"
+      },
+      {
+        "id": 2,
+        "original_name": "serie2",
+        "name": "s2"
+      }
+    ]
+  }
+]
