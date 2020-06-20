@@ -68,7 +68,7 @@ module.exports = function(cotaData, templates, context) {
 
             function processRegister(registerStatus) {
                 if (registerStatus.ok) {
-                    errorMsg.textContent = "User created with success."
+                    doLogin()
                     return
                 }
                 errorMsg.textContent = registerStatus.message

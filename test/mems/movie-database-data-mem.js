@@ -19,8 +19,7 @@ module.exports = function (dbFile) {
     }
 
     function getTvSeriesWithID(seriesId, serieAddPromise) {
-        const url = buildUrl(`/tv/${seriesId}`)
-        return serieAddPromise(makeRequest(url))
+        return serieAddPromise(Promise.resolve(dbFile.find( series => series.id === seriesId)))
     }
 
 

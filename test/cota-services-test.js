@@ -31,6 +31,11 @@ function cotaServicesOperationsTests(param) {
 
     describe("Data tests", function () {
         describe("Get a list of all groups from a user", getGroupListAllTest)
+        describe("Add new group", addGroupTest)
+        describe("Get an already existing group", getGroupTest)
+        describe("Edit a group", editGroupTest)
+        describe("Add a serie to existing group", addSerieToGroupTest)
+        describe("Remove a serie from existing group", removeSeriesFromGroupTest)
     })
 
     function registerUserTest() {
@@ -101,5 +106,64 @@ function cotaServicesOperationsTests(param) {
                 .then(res => expect(res).to.have.lengthOf(2))
         });
 
+    }
+    function addGroupTest() {
+        it('should add a new group to an existing user', function () {
+            const user = {
+                username: "testUser1"
+            }
+
+            return cotaDataServices.addGroup(user, "testGroup4", "this is group 4")
+                .then(group => expect(group.name).to.equal("testGroup4"))
+        });
+    }
+    function getGroupTest() {
+        it('should get an already existing group', function () {
+            const user = {
+                username: "testUser1"
+            }
+
+            return cotaDataServices.getGroup(user, "2")
+                .then(group => expect(group.id).to.equal("2"))
+        });
+    }
+    function editGroupTest() {
+        it('should edit an already existing group', function () {
+            const user = {
+                username: "testUser1"
+            }
+
+            return cotaDataServices.editGroup(user, "2", "testEditGroup2", "this was edited")
+                .then(group => {
+                    expect(group.id).to.equal("2")
+                    expect(group.name).to.equal("testEditGroup2")
+                    expect(group.description).to.equal("this was edited")
+                })
+        });
+    }
+    function addSerieToGroupTest() {
+        it('should add a serie to an already existing group', function () {
+            const user = {
+                username: "testUser1"
+            }
+
+            return cotaDataServices.addSerieToGroup(user, "2", 2)
+                .then(series => {
+                    expect(series.id).to.equal(2)
+                    expect(series.name).to.equal("s2")
+                })
+        });
+    }
+    function removeSeriesFromGroupTest() {
+        it('should remove a serie from a group', function () {
+            const user = {
+                username: "testUser1"
+            }
+
+            return cotaDataServices.removeSeriesFromGroup(user, "2", 5)
+                .then(serie => {
+                    expect(serie.id).to.equal(5)
+                })
+        });
     }
 }
