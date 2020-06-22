@@ -11,9 +11,6 @@ module.exports = function (_cotaAuthServices, _error) {
     router.get('/currentUser', currentUser)
     router.post('/logout', logout)
 
-    
-    Promise.prototype.sendResponse = sendResponse
-
     return router
 
 
@@ -28,61 +25,26 @@ module.exports = function (_cotaAuthServices, _error) {
     function login(req, rsp) {
         const credentials = req.body
         cotaAuthServices.login(credentials)
-            .then(validateUser)
+            .then( user => {
+                req.logIn(user, (err) => {})
+                return user;
+            })
             .sendResponse(rsp)
-
-        function validateUser(loginStatus) {
-            if (loginStatus.ok) {
-                req.logIn({
-                    username: req.body.username
-                }, (err) => {})
-            }
-            return loginStatus
-        }
     }
 
     // GET ../currentuser
     function currentUser(req, rsp) {
-        Promise.resolve({user: req.user}).sendResponse(rsp)
+        Promise.resolve(req.user)
+            .sendResponse(rsp)
     }
 
     // POST .../logout
     function logout(req, rsp) {
         cotaAuthServices.logout()
-            .then(logoutUser)
-            .sendResponse(rsp)
-
-        function logoutUser(logoutStatus) {
-            if (logoutStatus.ok) {
+            .then( logoutStatus => {
                 req.logOut({}, (err) => {})
-            }
-            return logoutStatus
-        }
-    }
-
-
-
-    ///////////////////
-    // AUX functions //   // NOTE: THIS CODE IS COMMON TO MODULE: cota-web-api-data
-    ///////////////////
-    function sendResponse(rsp, successStatusCode = 200, errorStatusCode = 500) {
-        this.then(processSuccess(rsp, successStatusCode)).catch(processError(rsp, errorStatusCode))
-    }
-
-    function processSuccess(rsp, statusCode) {
-        return processResponse(rsp, () => statusCode)
-    }
-
-    function processError(rsp, statusCode) {
-        return processResponse(rsp, (data) => error.toHttpStatusCode(data))
-    }
-
-
-    function processResponse(rsp, statusCodeSup) {
-        return function(data) {
-            rsp.statusCode = statusCodeSup(data)
-            rsp.setHeader("Content-Type", "application/json")
-            rsp.end(JSON.stringify(data))
-        }
-    }
+                return logoutStatus
+            })
+            .sendResponse(rsp)
+    } 
 }

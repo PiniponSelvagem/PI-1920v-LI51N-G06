@@ -38,10 +38,7 @@ module.exports = function (_fetch, _error, config = _config) {
                     return Promise.reject(error.get(82))
                 }
 
-                const userOutput = {
-                    username: user.username
-                }
-                return userOutput
+                return {username: user.username}
             })
     }
 
@@ -62,12 +59,12 @@ module.exports = function (_fetch, _error, config = _config) {
                     }
                 }
             )
-            .then( _ => makeRequest(uriManager.addUserUri(), setPostOptions(credentials), true))
+        
+        // add and return its username
+        return makeRequest(uriManager.addUserUri(), setPostOptions(credentials), true)
             .then(rsp => {
-                    if (rsp.result === "created") {
-                        return {
-                            username: credentials.username
-                        }
+                    if (rsp.result == "created") {
+                        return  {username: credentials.username}
                     }
                     else {
                         // ERROR 83 -> Some error occured when adding user to elasticsearch, contact administrator
@@ -89,8 +86,9 @@ module.exports = function (_fetch, _error, config = _config) {
                 if (refresh) {
                     await fetch(uriManager.refresh())
                 }
-                return rsp.json()
+                return rsp;
             })
+            .then(rsp => rsp.json())
     }
 
     function setPostOptions(data) {
