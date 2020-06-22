@@ -104,21 +104,11 @@ function deleteSerieFromGroup(groupId, serieId) {
 
 
 function register(username, password) {
-    const credentials = {
-        username: username,
-        password: password
-    }
-
-    return doPost(uriManager.getRegisterUri(), credentials)
+    return doPost(uriManager.getRegisterUri(), packCredentials(username, password))
 }
 
-function login(username, password) {
-    const credentials = {
-        username: username,
-        password: password
-    }
-    
-    return doPost(uriManager.getLoginUri(), credentials)
+function login(username, password) {    
+    return doPost(uriManager.getLoginUri(), packCredentials(username, password))
 }
 
 function getCurrentUser() {
@@ -143,4 +133,11 @@ function doPost(uri, data) {
         },
         body: JSON.stringify(data)
     }).then(rsp => rsp.json())
+}
+
+function packCredentials(username, password) {
+    return {
+        username: username,
+        password: password
+    }
 }

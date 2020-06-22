@@ -165,7 +165,7 @@ module.exports = function (_fetch, _error) {
         }
         return getGroup(user, groupId)
             .then(group => {
-                if(group.username != user) {
+                if(group.username != user.username) {
                     return Promise.reject(error.get(85))
                 }
                 return group
@@ -197,7 +197,7 @@ module.exports = function (_fetch, _error) {
         }
         return getGroup(user, groupId)
             .then(group => {
-                if(group.username != user) {
+                if(group.username != user.username) {
                     return Promise.reject(error.get(85))
                 }
                 return group
