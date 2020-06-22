@@ -75,7 +75,7 @@ module.exports = function (_cotaDataServices, _error) {
     // GET .../series/group/:gid/series
     function getGroupSeriesByVote(req, rsp) {
         req.isAuthenticated()
-            ? cotaDataServices.getGroupSeriesByVote(req.user, req.params.gid, req.query.min, req.query.max).sendResponse(rsp)
+            ? cotaDataServices.getGroupSeriesByVote(req.user, req.params.gid, parseFloat(req.query.min), parseFloat(req.query.max)).sendResponse(rsp)
             : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 
