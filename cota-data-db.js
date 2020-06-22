@@ -15,6 +15,7 @@ module.exports = function (_fetch, _error) {
 
     return {
         getGroupListAll       : getGroupListAll,
+        getGroupPublicListAll : getGroupPublicListAll,
         addGroup              : addGroup,
         getGroup              : getGroup,
         editGroup             : editGroup,
@@ -26,6 +27,7 @@ module.exports = function (_fetch, _error) {
     function UriManager() {
         const baseUri = `http://${config.host}:${config.port}/${config.index}/`
         this.getGroupListAllUri = (username) => `${baseUri}_search?q=username:${username}&size=${config.max_results}`
+        this.getGroupPublicListAllUri = () => `${baseUri}_search?q=share:public&size=${config.max_results}`
         this.addGroupUri = () => `${baseUri}_doc`
         this.getGroupUri = (id) => `${baseUri}_doc/${id}`
         this.editGroupUri = (id) => `${baseUri}_doc/${id}/_update`
@@ -41,6 +43,7 @@ module.exports = function (_fetch, _error) {
                 group => {
                     return {
                         id: group._id,
+                        share: group._source.share,
                         name: group._source.name,
                         description: group._source.description
                     }
@@ -48,9 +51,25 @@ module.exports = function (_fetch, _error) {
             .then(body => { debug(`getGroupListAll found ${body.length} groups`); return body; })
     }
 
-    function addGroup(user, groupName, groupDesc) {
+    function getGroupPublicListAll() {
+        const uri = uriManager.getGroupPublicListAllUri()
+        return makeRequest(uri)
+            .then(body => body.hits.hits.map(
+                group => {
+                    return {
+                        id: group._id,
+                        username: group._source.username,
+                        name: group._source.name,
+                        description: group._source.description
+                    }
+                }))
+            .then(body => { debug(`getGroupPublicListAll found ${body.length} groups`); return body; })
+    }
+
+    function addGroup(user, shareType, groupName, groupDesc) {
         let group = {
             username: user.username,
+            share: shareType,
             name: groupName,
             description: groupDesc,
             series: []
@@ -75,11 +94,15 @@ module.exports = function (_fetch, _error) {
                     return Promise.reject(error.get(10))
                 }
                 if (group._source.username != user.username) {
-                    return Promise.reject(error.get(84))
+                    if (group._source.share == "private") {
+                        return Promise.reject(error.get(84))
+                    }
                 }
 
                 let groupOutput = {
                     id: group._id,
+                    username: group._source.username,
+                    share: group._source.share,
                     name: group._source.name,
                     description: group._source.description
                 }
@@ -105,7 +128,14 @@ module.exports = function (_fetch, _error) {
         }
         const uri = uriManager.editGroupUri(groupId)
 
-        return getGroup(user, groupId).then(makeRequest(uri, options, true)
+        return getGroup(user, groupId)
+            .then(group => {
+                if(group.username != user.username) {
+                    return Promise.reject(error.get(85))
+                }
+                return group
+            })
+            .then(() => makeRequest(uri, options, true)
             .then(body => {
                 if(body.error) {
                     return Promise.reject(error.get(10))
@@ -133,7 +163,14 @@ module.exports = function (_fetch, _error) {
             body: JSON.stringify(script),
             headers: { 'Content-Type': 'application/json'}
         }
-        return getGroup(user, groupId).then(makeRequest(uri, options, true)
+        return getGroup(user, groupId)
+            .then(group => {
+                if(group.username != user) {
+                    return Promise.reject(error.get(85))
+                }
+                return group
+            })
+            .then(() => makeRequest(uri, options, true)
             .then(body => {
                 if (body.error) {
                     return Promise.reject(error.get(10))
@@ -158,7 +195,14 @@ module.exports = function (_fetch, _error) {
             body: JSON.stringify(script),
             headers: { 'Content-Type': 'application/json'}
         }
-        return getGroup(user, groupId).then(makeRequest(uri, options, true)
+        return getGroup(user, groupId)
+            .then(group => {
+                if(group.username != user) {
+                    return Promise.reject(error.get(85))
+                }
+                return group
+            })
+            .then(() => makeRequest(uri, options, true)
             .then(body => {
                 if(body.error) {
                     return Promise.reject(error.get(10))

@@ -3,6 +3,7 @@
     <table>
         <thead>
             <tr>
+                <th></th>
                 <th>Name</th>
                 <th>Description</th>
             </tr>
@@ -10,6 +11,13 @@
         <tbody id="items">
             {{#each this}}
             <tr>
+                <td id="lock-td">
+                    {{#ifEqual share "private"}}
+                    <img id="lock" src="assets/lock_on.png"/>
+                    {{else}}
+                    <img id="lock" src="assets/lock_off.png"/>
+                    {{/ifEqual}}
+                </td>
                 <td><a href="#group/{{id}}">{{name}}</a></td>
                 <td>{{description}}</td>
             </tr>
@@ -24,6 +32,12 @@
         <div class="data-group">
             <div><span>Group name: </span><input type="text" id="name"/></div>
             <div><span>Group description: </span><input type="text" id="description"/></div>
+            <div>
+                <input type="radio" id="share" name="share" value="public">
+                <label for="public">Public</label><br>
+                <input type="radio" id="share" name="share" value="private">
+                <label for="private">Private</label>
+            </div>
         </div>
         <button id="btn-create-group">
             Create Group

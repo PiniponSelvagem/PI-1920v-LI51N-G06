@@ -9,6 +9,7 @@ module.exports = function (_cotaDataServices, _error) {
     router.get('/tv/popular', getTvPopular)
     router.get('/tv/search', getTvSearch)
     router.get('/series/group/list', getGroupListAll)
+    router.get('/series/group/list/public', getGroupPublicListAll)
     router.post('/series/group', addGroup)
     router.get('/series/group/:gid', getGroup)
     router.post('/series/group/:gid', editGroup)
@@ -37,10 +38,15 @@ module.exports = function (_cotaDataServices, _error) {
             : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 
+    // GET .../series/group/list/public
+    function getGroupPublicListAll(req, rsp) {
+        cotaDataServices.getGroupPublicListAll().sendResponse(rsp)
+    }
+
     // POST .../series/group
     function addGroup(req, rsp) {
         req.isAuthenticated()
-            ? cotaDataServices.addGroup(req.user, req.body.name, req.body.description).sendResponse(rsp, 201)
+            ? cotaDataServices.addGroup(req.user, req.body.share, req.body.name, req.body.description).sendResponse(rsp, 201)
             : Promise.resolve(error.get(60)).sendResponse(rsp)
     }
 

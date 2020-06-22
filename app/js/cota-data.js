@@ -2,6 +2,7 @@ module.exports = {
     getTvPopular         : getTvPopular,
     getTvSearch          : getTvSearch,
     getGroupList         : getGroupList,
+    getGroupListPublic   : getGroupListPublic,
     getGroup             : getGroup,
     createGroup          : createGroup,
     editGroup            : editGroup,
@@ -28,6 +29,7 @@ function UriManager() {
     this.getTvPolularUri = () => `${dataUri}tv/popular`
     this.getTvSearchUri = (query) => `${dataUri}tv/search?query=${query}`
     this.getGroupListUri = () => `${dataUri}series/group/list`
+    this.getGroupListPublicUri = () => `${dataUri}series/group/list/public`
     this.getGroupUri = (id) => `${dataUri}series/group/${id}`
     this.getAddGroupUri = () => `${dataUri}series/group`
     this.getEditGroupUri = (id) => `${dataUri}series/group/${id}`
@@ -59,6 +61,11 @@ function getTvSearch(query) {
 
 function getGroupList() {
     return fetch(uriManager.getGroupListUri())
+        .then(rsp => rsp.json())
+}
+
+function getGroupListPublic() {
+    return fetch(uriManager.getGroupListPublicUri())
         .then(rsp => rsp.json())
 }
 

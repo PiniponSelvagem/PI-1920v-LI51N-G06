@@ -27,3 +27,17 @@ npm run-script build
 -------------------------------------------
 
 npm install --save-dev mocha
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+Trab Individual
+
+1.  Grupos públicos e privados - Cada utilizador pode ter grupos de séries públicos e privados.
+    Os grupos privados apenas podem ser visualizados pelo próprio utilizador enquanto, os públicos
+    podem ser visualizados por todos os utilizadores autenticados.
+
+

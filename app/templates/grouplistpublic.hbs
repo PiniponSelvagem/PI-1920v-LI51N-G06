@@ -1,0 +1,21 @@
+<section id="show-grouplist">
+    <h1>Public Group List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Owner</th>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody id="items">
+            {{#each this}}
+            <tr>
+                <td>{{username}}</td>
+                <td><a href="#group/{{id}}">{{name}}</a></td>
+                <td>{{description}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</section>

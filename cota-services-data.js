@@ -10,6 +10,7 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         getTvPopular          : getTvPopular,
         getTvSearch           : getTvSearch,
         getGroupListAll       : getGroupListAll,
+        getGroupPublicListAll : getGroupPublicListAll,
         addGroup              : addGroup,
         getGroup              : getGroup,
         editGroup             : editGroup,
@@ -30,12 +31,20 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         return cotaDb.getGroupListAll(user)
     }
 
-    function addGroup(user, groupName, groupDesc) {
+    function getGroupPublicListAll() {
+        return cotaDb.getGroupPublicListAll()
+    }
+
+    function addGroup(user, shareType, groupName, groupDesc) {
         if (!groupName || !groupDesc) {
             return Promise.reject(error.get(20))
         }
+
+        if (isInvalidShareType(shareType)) {
+            return Promise.reject(error.get(25))
+        }
         
-        return cotaDb.addGroup(user, groupName, groupDesc)
+        return cotaDb.addGroup(user, shareType, groupName, groupDesc)
     }
 
     function getGroup(user, id) {
@@ -111,5 +120,9 @@ module.exports = function (_movieDb, _cotaDb, _error) {
     ///////////////////
     function isInvalidRange(min, max) {
         return min > max || min < 0 || max > 10
+    }
+
+    function isInvalidShareType(shareType) {
+        return shareType != "public" && shareType != "private"
     }
 }

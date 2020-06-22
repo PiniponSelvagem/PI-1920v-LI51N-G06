@@ -40,9 +40,16 @@ module.exports = function(cotaData, templates, context) {
         document.querySelector("#btn-auth-login").onclick = doLogin
         document.querySelector("#btn-auth-register").onclick = doRegister
 
+        const passwordInput = document.querySelector("#password")
+        passwordInput.addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {     // "ENTER key"
+              document.getElementById("btn-auth-login").click();
+            }
+          }); 
+
         function doLogin() {
             const username = document.querySelector("#username").value
-            const password = document.querySelector("#password").value
+            const password = passwordInput.value
 
             cotaData.login(username, password)
                 .then(processLogin)

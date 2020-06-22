@@ -5,6 +5,7 @@ module.exports = function(cotaData, templates, context) {
         tvpopular          : showTvPopular,
         tvsearch           : showTvSearch,
         grouplist          : showGroupList,
+        grouplistpublic    : showGroupListPublic,
         group              : showGroup,
         seriegroupselector : showSerieAddGroupList,
         nonauthenticated   : showNonAuthenticated
@@ -45,10 +46,27 @@ module.exports = function(cotaData, templates, context) {
         
         function createGroup() {
             let group = { }
-            document.querySelectorAll(".data-group input")
-                .forEach(input => group[input.id] = input.value)
+            document.querySelectorAll(".data-group [type=text]")
+                .forEach(input => {
+                    group[input.id] = input.value;
+                })
+            
+            document.querySelectorAll(".data-group [type=radio]")
+                .forEach(input => {
+                    if (input.checked) {
+                        group[input.id] = input.value;
+                    }
+                })
             cotaData.createGroup(group)
                 .then(group => group.message ? showError(group) : showGroupList())
+        }
+    }
+
+    function showGroupListPublic() {
+        cotaData.getGroupListPublic().then(showView)
+    
+        function showView(items) {
+            mainContent.innerHTML = templates.grouplistpublic(items)
         }
     }
 
