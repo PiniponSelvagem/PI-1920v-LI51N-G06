@@ -53,6 +53,7 @@ module.exports = function(cotaData, templates, context) {
                 .then(processLogin)
 
             function processLogin(status) {
+                console.log(status)
                 if(status.error) {
                     errorMsg.textContent = status.error.message
                     return

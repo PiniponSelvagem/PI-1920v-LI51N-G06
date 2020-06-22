@@ -32,48 +32,48 @@ module.exports = function (_cotaDataServices, _error) {
     function getGroupListAll(req, rsp) {
         req.isAuthenticated()
             ? cotaDataServices.getGroupListAll(req.user).sendResponse(rsp)
-            : Promise.resolve(error.get(60)).sendResponse(rsp)
+            : Promise.reject(error.get(60)).sendResponse(rsp)
     }
 
     // POST .../series/group
     function addGroup(req, rsp) {
         req.isAuthenticated()
             ? cotaDataServices.addGroup(req.user, req.body.name, req.body.description).sendResponse(rsp, 201)
-            : Promise.resolve(error.get(60)).sendResponse(rsp)
+            : Promise.reject(error.get(60)).sendResponse(rsp)
     }
 
     // GET .../series/group/:gid
     function getGroup(req, rsp) {
         req.isAuthenticated()
             ? cotaDataServices.getGroup(req.user, req.params.gid).sendResponse(rsp)
-            : Promise.resolve(error.get(60)).sendResponse(rsp)
+            : Promise.reject(error.get(60)).sendResponse(rsp)
     }
 
     // POST .../series/group/:gid
     function editGroup(req, rsp) {
         req.isAuthenticated()
             ? cotaDataServices.editGroup(req.user, req.params.gid, req.body.name, req.body.description).sendResponse(rsp)
-            : Promise.resolve(error.get(60)).sendResponse(rsp)
+            : Promise.reject(error.get(60)).sendResponse(rsp)
     }
 
     // POST .../series/group/:gid/series
     function addSerieToGroup(req, rsp) {
         req.isAuthenticated()
             ? cotaDataServices.addSerieToGroup(req.user, req.params.gid, req.body.id).sendResponse(rsp, 201)
-            : Promise.resolve(error.get(60)).sendResponse(rsp)
+            : Promise.reject(error.get(60)).sendResponse(rsp)
     }
 
     // DELETE .../series/group/:gid/series/:sid
     function removeSeriesFromGroup(req, rsp) {
         req.isAuthenticated()
             ? cotaDataServices.removeSeriesFromGroup(req.user, req.params.gid, req.params.sid).sendResponse(rsp)
-            : Promise.resolve(error.get(60)).sendResponse(rsp)
+            : Promise.reject(error.get(60)).sendResponse(rsp)
     }
 
     // GET .../series/group/:gid/series
     function getGroupSeriesByVote(req, rsp) {
         req.isAuthenticated()
             ? cotaDataServices.getGroupSeriesByVote(req.user, req.params.gid, parseFloat(req.query.min), parseFloat(req.query.max)).sendResponse(rsp)
-            : Promise.resolve(error.get(60)).sendResponse(rsp)
+            : Promise.reject(error.get(60)).sendResponse(rsp)
     }
 }

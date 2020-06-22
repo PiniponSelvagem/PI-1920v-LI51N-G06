@@ -19,8 +19,7 @@ module.exports = function (_fetch, _error, config = _config) {
         getGroup              : getGroup,
         editGroup             : editGroup,
         addSerieToGroup       : addSerieToGroup,
-        removeSeriesFromGroup : removeSeriesFromGroup,
-        findGroup             : findGroup
+        removeSeriesFromGroup : removeSeriesFromGroup
     }
 
     function UriManager() {
@@ -169,31 +168,18 @@ module.exports = function (_fetch, _error, config = _config) {
         )
     }
     
-    async function findGroup(user, groupId) {
-        let groups = await getGroupListAll(user)
-        return findById(user, groupId, groups)
-    }
-
-
-    
     ///////////////////
     // AUX functions //
     ///////////////////
-    async function makeRequest(uri, options, refresh) {
+    function makeRequest(uri, options, refresh) {
         debug(`request to (ElasticSearch) ${uri}`)
-        const body = await fetch(uri, options).then(rsp => rsp.json())
-
-        if (refresh) {
-            await fetch(uriManager.refresh())
-        }
-
-        return body
-    }
-
-    async function findById(user, id, array) {
-        let group = array.find(item => (item.id == id))
-        if (!group) return
-        let series = await getGroup(user, id)
-        return series
+        return fetch(uri, options)
+            .then(async rsp => {
+                if (refresh) {
+                    await fetch(uriManager.refresh())
+                }
+                return rsp;
+            })
+            .then(rsp => rsp.json())
     }
 }
