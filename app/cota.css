@@ -131,7 +131,6 @@ button:hover {
 }
 
 
-
 table  {
     border-collapse: collapse;
 }
@@ -156,7 +155,8 @@ table a {
     text-decoration: none;
 }
 table button {
-    padding: 9px 10px;
+    height: 30pt;
+    width: 100%;
 }
 table button[id^="btn-delete"] {
     background-color: #9e1800;
@@ -174,7 +174,7 @@ table button[id^="btn-add"]:hover {
     background-color: #4CAF50;
     color: white;
 }
-table #lock-td {
+table #td-nopadding {
     padding: 0pt 0pt;
 }
 table #lock {
