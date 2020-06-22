@@ -5,7 +5,10 @@ module.exports = function(cotaData, templates, context) {
     
     // In case session is valid, but user refreshed the page. Show user name at user info.
     cotaData.getCurrentUser()
-        .then(rsp => {context.user = rsp.user; return context.user})
+        .then(status => { 
+            context.user = status.result
+            return context.user
+        })
         .then(showCurrentUserInfo)
 
     return states = {
@@ -13,14 +16,16 @@ module.exports = function(cotaData, templates, context) {
         logout : logout
     }
 
-    function showCurrentUserInfo(username) {
-        if (username) {
-            userInfoNavBar.innerHTML = templates.user_loggedin(username)
+    function showCurrentUserInfo(user) {
+        if (user) {
+            userInfoNavBar.innerHTML = templates.user_loggedin(user)
             document.querySelector("#btn-navbar-logout").onclick = goToLogout
+            document.querySelector("#group-list-button").style.display = "block";
         }
         else {
             userInfoNavBar.innerHTML = templates.user_loggedout()
             document.querySelector("#btn-navbar-login").onclick = goToLogin
+            document.querySelector("#group-list-button").style.display = "none"
         }
 
         function goToLogin() {
@@ -47,15 +52,15 @@ module.exports = function(cotaData, templates, context) {
             cotaData.login(username, password)
                 .then(processLogin)
 
-            function processLogin(loginStatus) {
-                context.user = { username: loginStatus.username }
-                if (loginStatus.ok) {
-                    Promise.resolve(context.user).then(showCurrentUserInfo)
-                    document.querySelector(".topnav").style.display = "block";
-                    location.hash = "tvpopular"
+            function processLogin(status) {
+                if(status.error) {
+                    errorMsg.textContent = status.error.message
                     return
                 }
-                errorMsg.textContent = loginStatus.message
+                context.user = status.result
+                showCurrentUserInfo(context.user)
+                document.querySelector(".topnav").style.display = "block";
+                location.hash = "tvpopular"
             }
         }
 
@@ -66,12 +71,12 @@ module.exports = function(cotaData, templates, context) {
             cotaData.register(username, password)
                 .then(processRegister)
 
-            function processRegister(registerStatus) {
-                if (registerStatus.ok) {
-                    doLogin()
+            function processRegister(status) {
+                if (status.error) {
+                    errorMsg.textContent = status.error.message
                     return
                 }
-                errorMsg.textContent = registerStatus.message
+                doLogin()
             }
         }
     }

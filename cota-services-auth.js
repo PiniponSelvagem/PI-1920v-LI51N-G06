@@ -14,15 +14,13 @@ module.exports = function (_cotaAuthDb, _error) {
 
     function register(credentials) {
         return cotaAuthDb.addUser(credentials)
-            .then(() => {return {ok: true, username: credentials.username}})
     }
 
     function login(credentials) {
         return cotaAuthDb.getUser(credentials)
-            .then(() => {return {ok: true, username: credentials.username}})
     }
 
     function logout() {
-        return Promise.resolve({ok: true})
+        return Promise.resolve({})
     }
 }

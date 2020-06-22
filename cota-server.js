@@ -10,6 +10,8 @@ const expressSession = require('express-session');
 passport.serializeUser(serializeUser);
 passport.deserializeUser(deserializeUser);
 
+Promise.prototype.sendResponse = sendResponse
+
 const movieDb = require('./movie-database-data')(fetch)
 const error = require('./cota-error')()
 const cotaDataDb = require('./cota-data-db')(fetch, error)
@@ -51,4 +53,25 @@ function deserializeUser(user, done) {
 function serializeUser(user, done) {
     //debug("serializeUserCalled", user)
     done(null, user)
+}
+
+///////////////////
+// AUX functions //
+///////////////////
+function sendResponse(rsp, successStatusCode = 200, errorStatusCode = 500) {
+    this.then(processSuccess(rsp, successStatusCode)).catch(processError(rsp, errorStatusCode))
+}
+
+function processSuccess(rsp, statusCode) {
+    return function(data) {
+        rsp.statusCode = statusCode
+        rsp.end(JSON.stringify({result:data}))
+    }
+}
+
+function processError(rsp, statusCode) {
+    return function(err) {
+        rsp.statusCode = error.toHttpStatusCode(err)
+        rsp.end(JSON.stringify({error:err}))
+    }
 }

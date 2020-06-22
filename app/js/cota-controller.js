@@ -13,8 +13,8 @@ module.exports = function(cotaData, templates, context) {
     function showTvPopular() {
         cotaData.getTvPopular().then(showView)
     
-        function showView(items) {
-            mainContent.innerHTML = templates.tvpopular(items.results)
+        function showView(rsp) {
+            mainContent.innerHTML = templates.tvpopular(rsp.result.results)
         }
     }
 
@@ -22,10 +22,10 @@ module.exports = function(cotaData, templates, context) {
         const query = document.querySelector("#input-tvsearch").value
         cotaData.getTvSearch(query).then(showView)
 
-        function showView(items) {
+        function showView(data) {
             const results = {
                 searchquery: decodeURIComponent(query), // decode special characters to, like: 日本語
-                items: items.results
+                items: rsp.result.results
             }
             mainContent.innerHTML = templates.tvsearch(results)
         }
@@ -34,12 +34,12 @@ module.exports = function(cotaData, templates, context) {
     function showGroupList() {
         cotaData.getGroupList().then(showView)
     
-        function showView(items) {
-            if (items.message && items.id==60) {
+        function showView(rsp) {
+            if (rsp.error && rsp.error.id==60) {
                 showNonAuthenticated()
                 return
             }
-            mainContent.innerHTML = templates.grouplist(items)
+            mainContent.innerHTML = templates.grouplist(rsp.result)
             document.querySelector("#btn-create-group").onclick = createGroup
         }
         
@@ -48,22 +48,22 @@ module.exports = function(cotaData, templates, context) {
             document.querySelectorAll(".data-group input")
                 .forEach(input => group[input.id] = input.value)
             cotaData.createGroup(group)
-                .then(group => group.message ? showError(group) : showGroupList())
+                .then(rsp => rsp.error ? showError(rsp.error) : showGroupList())
         }
     }
 
     function showGroup(id) {
         cotaData.getGroup(id).then(showView)
     
-        function showView(items) {
-            if (items.message && items.id==60) {
+        function showView(rsp) {
+            if (rsp.error && rsp.error.id==60) {
                 showNonAuthenticated()
                 return
             }
             else {
-                mainContent.innerHTML = templates.group(items)
+                mainContent.innerHTML = templates.group(rsp.result)
                 const table = document.querySelector("#series-content")
-                table.innerHTML = templates.group_series(items)
+                table.innerHTML = templates.group_series(rsp.result)
 
                 document.querySelector("#btn-edit-group").onclick = editGroup
                 document.querySelector("#btn-series-by-vote").onclick = seriesByVote
@@ -82,7 +82,7 @@ module.exports = function(cotaData, templates, context) {
                 .forEach(input => group[input.id] = input.value)
             
             cotaData.editGroup(id, group)
-                .then(group => group.message ? showError(group) : showGroup(groupId))
+                .then(rsp => rsp.error ? showError(rsp.error) : showGroup(groupId))
         }
 
         function seriesByVote() {
@@ -94,7 +94,7 @@ module.exports = function(cotaData, templates, context) {
                 .forEach(input => voteRange[input.id] = input.value)
 
             cotaData.getSeriesByVote(group.id, voteRange)
-                .then(series => series.message ? showError(series) : showSeriesByVote({group, series}))
+                .then(rsp => rsp.error ? showError(rsp.error) : showSeriesByVote({group:group, series:rsp.result}))
         }
 
         function deleteSerieToGroup() {
@@ -109,12 +109,12 @@ module.exports = function(cotaData, templates, context) {
     function showSerieAddGroupList() {
         cotaData.getGroupList().then(showView)
     
-        function showView(items) {
-            if (items.message && items.id==60) {
+        function showView(rsp) {
+            if (rsp.error && rsp.error.id==60) {
                 showNonAuthenticated()
                 return
             }
-            mainContent.innerHTML = templates.seriegroupselector(items)
+            mainContent.innerHTML = templates.seriegroupselector(rsp.result)
 
             const buttons = document.querySelectorAll("#btn-add-serie")
             for (const button of buttons) {
@@ -131,13 +131,14 @@ module.exports = function(cotaData, templates, context) {
         }
     }
     
-    function showSeriesByVote(groupInfo) {
-        if (items.message && items.id==60) {
+    function showSeriesByVote(rsp) {
+        if (rsp.error && rsp.error.id==60) {
             showNonAuthenticated()
             return
         }
+        console.log(rsp)
         const table = document.querySelector("#series-content")
-        table.innerHTML = templates.group_seriesbyvote(groupInfo)
+        table.innerHTML = templates.group_seriesbyvote(rsp.result)
     }
 
     function showNonAuthenticated() {    

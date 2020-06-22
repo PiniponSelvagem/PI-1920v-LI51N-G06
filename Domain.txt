@@ -1,0 +1,15 @@
+Group:
+    - id (Unique String)
+    - user (Owner's Username)
+    - name (Group's Name)
+    - description (Group's description)
+    - series (Series Array)
+
+Series:
+    - id (Unique Number)
+    - original_name (Series Original Name)
+    - name (Series Name)
+
+User:
+    - username (Username)
+    - password (Password unrestricted)

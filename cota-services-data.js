@@ -70,40 +70,25 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         if (isNaN(min) || isNaN(max) || isInvalidRange(min, max)) {
             return Promise.reject(error.get(22))
         }
-        const group = await cotaDb.findGroup(user, groupId)
-        if(!group) {
-            return Promise.reject(error.get(10))
-        }
-        const series = group.series
-        if(!series) {
-            return Promise.resolve([])
-        }
-
-        let seriesByVote = []
-
-        function getSeriesWithAverage(id) {
-            return movieDb.getTvSeriesWithID(id, function(seriesMovieDb) {
-                return seriesMovieDb.then((_serie) => {
-                    const s = {
-                        id: _serie.id,
-                        original_name: _serie.original_name,
-                        name: _serie.name,
-                        description: _serie.overview,
-                        original_language: _serie.original_language,
-                        vote_average: _serie.vote_average
-                    }
-                    seriesByVote.push(s)
-                    if(seriesByVote.length == series.length) {
-                        seriesByVote = seriesByVote.filter((item) => item.vote_average >= min && item.vote_average <= max)
-                        seriesByVote.sort((s1,s2) => s2.vote_average - s1.vote_average);
-                        return Promise.resolve(seriesByVote)
-                    } else {
-                        return getSeriesWithAverage(series[seriesByVote.length].id)
-                    }
+        const series = await cotaDb.getGroup(user, groupId)
+            .then(group =>
+                group.series.map( series => {
+                    return movieDb.getTvSeriesWithID(series.id)
+                    .then(seriesById => {
+                        return {
+                            id: seriesById.id,
+                            original_name: seriesById.original_name,
+                            name: seriesById.name,
+                            description: seriesById.overview,
+                            original_language: seriesById.original_language,
+                            vote_average: seriesById.vote_average
+                        }
+                    })
                 })
-            })
-        }
-        return getSeriesWithAverage(series[0].id)
+            )
+        return series
+            .filter(series => series.vote_average >= min && series.vote_average <= max)
+            .sort((s1,s2) => s2.vote_average - s1.vote_average)
     }
 
     ///////////////////
