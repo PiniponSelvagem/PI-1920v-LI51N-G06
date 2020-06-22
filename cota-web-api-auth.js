@@ -35,7 +35,7 @@ module.exports = function (_cotaAuthServices, _error) {
             if (loginStatus.ok) {
                 req.logIn({
                     username: req.body.username
-                }, (err) => rsp.json(loginStatus))
+                }, (err) => {})
             }
             return loginStatus
         }
@@ -54,7 +54,7 @@ module.exports = function (_cotaAuthServices, _error) {
 
         function logoutUser(logoutStatus) {
             if (logoutStatus.ok) {
-                req.logOut({}, (err) => rsp.json(logoutStatus))
+                req.logOut({}, (err) => {})
             }
             return logoutStatus
         }
@@ -81,7 +81,7 @@ module.exports = function (_cotaAuthServices, _error) {
     function processResponse(rsp, statusCodeSup) {
         return function(data) {
             rsp.statusCode = statusCodeSup(data)
-            //rsp.setHeader("Content-Type", "application/json")
+            rsp.setHeader("Content-Type", "application/json")
             rsp.end(JSON.stringify(data))
         }
     }
