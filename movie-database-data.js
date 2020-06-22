@@ -21,9 +21,9 @@ module.exports = function (_fetch, MOVIE_DB_KEY = './json_files/MOVIE_DB_KEY') {
         return makeRequest(url)
     }
 
-    function getTvSeriesWithID(seriesId, serieAddPromise) {
+    function getTvSeriesWithID(seriesId) {
         const url = buildUrl(`/tv/${seriesId}`)
-        return serieAddPromise(makeRequest(url))
+        return makeRequest(url)
     }
 
 

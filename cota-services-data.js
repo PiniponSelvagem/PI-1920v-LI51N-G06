@@ -47,48 +47,51 @@ module.exports = function (_movieDb, _cotaDb, _error) {
     }
 
     function addSerieToGroup(user, groupId, seriesId) {
-        return movieDb.getTvSeriesWithID(seriesId, function(seriesMovieDb) {
-            return seriesMovieDb.then((_serie) => {
-                const serie = {
-                    id: _serie.id,
-                    original_name: _serie.original_name,
-                    name: _serie.name,
-                    description: _serie.overview,
-                    original_language: _serie.original_language
+        return movieDb.getTvSeriesWithID(seriesId)
+            .then(series => {
+                const formatedSeries = {
+                    id: series.id,
+                    original_name: series.original_name,
+                    name: series.name,
+                    description: series.overview,
+                    original_language: series.original_language
                 }
-                return cotaDb.addSerieToGroup(user, groupId, serie)
+                return cotaDb.addSerieToGroup(user, groupId, formatedSeries)
             })
-        })
     }
 
     function removeSeriesFromGroup(user, groupId, seriesId) {
         return cotaDb.removeSeriesFromGroup(user, groupId, seriesId)
     }
 
-    async function getGroupSeriesByVote(user, groupId, min = 0, max = 10) {
+    function getGroupSeriesByVote(user, groupId, min = 0, max = 10) {
         debug(`Min=${min} & Max=${max}`)
         if (isNaN(min) || isNaN(max) || isInvalidRange(min, max)) {
+            debug("God help me")
             return Promise.reject(error.get(22))
         }
-        const series = await cotaDb.getGroup(user, groupId)
+        return cotaDb.getGroup(user, groupId)
             .then(group =>
                 group.series.map( series => {
                     return movieDb.getTvSeriesWithID(series.id)
-                    .then(seriesById => {
-                        return {
-                            id: seriesById.id,
-                            original_name: seriesById.original_name,
-                            name: seriesById.name,
-                            description: seriesById.overview,
-                            original_language: seriesById.original_language,
-                            vote_average: seriesById.vote_average
-                        }
-                    })
-                })
+                        .then(serie => {
+                            return {
+                                id: serie.id,
+                                original_name: serie.original_name,
+                                name: serie.name,
+                                description: serie.overview,
+                                original_language: serie.original_language,
+                                vote_average: serie.vote_average
+                            }
+                        })
+                    }
+                )
             )
-        return series
-            .filter(series => series.vote_average >= min && series.vote_average <= max)
-            .sort((s1,s2) => s2.vote_average - s1.vote_average)
+            .then(mappedPromises => Promise.all(mappedPromises))
+            .then(mappedSeries =>
+                mappedSeries
+                    .filter(series => series.vote_average >= min && series.vote_average <= max)
+                    .sort((s1,s2) => s2.vote_average - s1.vote_average))
     }
 
     ///////////////////

@@ -42,9 +42,9 @@ module.exports = function (_fetch, _error, config = _config) {
             })
     }
 
-    async function addUser(credentials) {        
+    function addUser(credentials) {
         // check if user exists
-        await makeRequest(uriManager.getUserUri(credentials.username))
+        return makeRequest(uriManager.getUserUri(credentials.username))
             .then(rsp => {
                     if (rsp.error) {    // elasticsearch not created
                         /*
@@ -54,7 +54,7 @@ module.exports = function (_fetch, _error, config = _config) {
                         */
                         ;
                     }
-                    else if (rsp.hits.total.value != 0) {
+                    else if (rsp.hits.total.value !== 0) {
                         return Promise.reject(error.get(81))
                     }
                 }
