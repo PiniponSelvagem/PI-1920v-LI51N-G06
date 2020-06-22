@@ -18,8 +18,8 @@ module.exports = function (dbFile) {
         return makeRequest(url)
     }
 
-    function getTvSeriesWithID(seriesId, serieAddPromise) {
-        return serieAddPromise(Promise.resolve(dbFile.find( series => series.id === seriesId)))
+    function getTvSeriesWithID(seriesId) {
+        return Promise.resolve(dbFile.find( series => series.id === seriesId))
     }
 
 
