@@ -22,7 +22,7 @@ module.exports = function(cotaData, templates, context) {
         const query = document.querySelector("#input-tvsearch").value
         cotaData.getTvSearch(query).then(showView)
 
-        function showView(data) {
+        function showView(rsp) {
             const results = {
                 searchquery: decodeURIComponent(query), // decode special characters to, like: 日本語
                 items: rsp.result.results
@@ -94,7 +94,7 @@ module.exports = function(cotaData, templates, context) {
                 .forEach(input => voteRange[input.id] = input.value)
 
             cotaData.getSeriesByVote(group.id, voteRange)
-                .then(rsp => rsp.error ? showError(rsp.error) : showSeriesByVote({group:group, series:rsp.result}))
+                .then(rsp => rsp.error ? showError(rsp.error) : showSeriesByVote(rsp))
         }
 
         function deleteSerieToGroup() {
@@ -136,9 +136,8 @@ module.exports = function(cotaData, templates, context) {
             showNonAuthenticated()
             return
         }
-        console.log(rsp)
         const table = document.querySelector("#series-content")
-        table.innerHTML = templates.group_seriesbyvote(rsp.result)
+        table.innerHTML = templates.group_seriesbyvote({series:rsp.result})
     }
 
     function showNonAuthenticated() {    
