@@ -64,7 +64,7 @@ module.exports = function (_fetch, _error) {
             )
         
         // add and return its username
-        return makeRequest(uriManager.addUserUri(), setPostOptions(credentials))
+        return makeRequest(uriManager.addUserUri(), setPostOptions(credentials), true)
             .then(rsp => {
                     if (rsp.result == "created") {
                         const userOutput = {

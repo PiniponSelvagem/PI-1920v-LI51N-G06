@@ -76,12 +76,7 @@ module.exports = function (_fetch, _error) {
         }
 
         const uri = uriManager.addGroupUri()
-        const options = {
-            method: "POST",
-            body: JSON.stringify(group),
-            headers: { 'Content-Type': 'application/json'}
-        }
-        return makeRequest(uri, options, true)
+        return makeRequest(uri, setPostOptions(script), true)
             .then(body => { group.id = body._id; return group; })
             .then(body => { debug(`new group added with id: ${group.id}`); return body; })
     }
@@ -93,9 +88,9 @@ module.exports = function (_fetch, _error) {
                 if (!group.found) {
                     return Promise.reject(error.get(10))
                 }
-                if (group._source.username != user.username) {
+                if (!user || group._source.username != user.username) {
                     if (group._source.share == "private") {
-                        return Promise.reject(error.get(84))
+                        return Promise.resolve(error.get(84))
                     }
                 }
 
@@ -121,21 +116,10 @@ module.exports = function (_fetch, _error) {
         let doc = {}
         if(name) doc.name = name
         if(description) doc.description = description
-        const options = {
-            method: "POST",
-            body: JSON.stringify({ doc: doc }),
-            headers: { 'Content-Type': 'application/json'}
-        }
-        const uri = uriManager.editGroupUri(groupId)
 
-        return getGroup(user, groupId)
-            .then(group => {
-                if(group.username != user.username) {
-                    return Promise.reject(error.get(85))
-                }
-                return group
-            })
-            .then(() => makeRequest(uri, options, true)
+        const uri = uriManager.editGroupUri(groupId)
+        return getGroupToModify(user, groupId)
+            .then(() => makeRequest(uri, setPostOptions(script), true)
             .then(body => {
                 if(body.error) {
                     return Promise.reject(error.get(10))
@@ -158,19 +142,8 @@ module.exports = function (_fetch, _error) {
         }
 
         const uri = uriManager.addSerieToGroupUri(groupId)
-        const options = {
-            method: "POST",
-            body: JSON.stringify(script),
-            headers: { 'Content-Type': 'application/json'}
-        }
-        return getGroup(user, groupId)
-            .then(group => {
-                if(group.username != user.username) {
-                    return Promise.reject(error.get(85))
-                }
-                return group
-            })
-            .then(() => makeRequest(uri, options, true)
+        return getGroupToModify(user, groupId)
+            .then(() => makeRequest(uri, setPostOptions(script), true)
             .then(body => {
                 if (body.error) {
                     return Promise.reject(error.get(10))
@@ -190,19 +163,8 @@ module.exports = function (_fetch, _error) {
         }
 
         const uri = uriManager.removeSeriesFromGroupUri(groupId)
-        const options = {
-            method: "POST",
-            body: JSON.stringify(script),
-            headers: { 'Content-Type': 'application/json'}
-        }
-        return getGroup(user, groupId)
-            .then(group => {
-                if(group.username != user.username) {
-                    return Promise.reject(error.get(85))
-                }
-                return group
-            })
-            .then(() => makeRequest(uri, options, true)
+        return getGroupToModify(user, groupId)
+            .then(() => makeRequest(uri, setPostOptions(script), true)
             .then(body => {
                 if(body.error) {
                     return Promise.reject(error.get(10))
@@ -234,10 +196,28 @@ module.exports = function (_fetch, _error) {
         return body
     }
 
+    function setPostOptions(data) {
+        return {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }
+    }
+
     async function findById(user, id, array) {
         let group = array.find(item => (item.id == id))
         if (!group) return
         let series = await getGroup(user, id)
         return series
+    }
+
+    function getGroupToModify(user, groupId) {
+        return getGroup(user, groupId)
+            .then(group => {
+                if(group.username != user.username) {
+                    return Promise.reject(error.get(85))
+                }
+                return group
+            })
     }
 }

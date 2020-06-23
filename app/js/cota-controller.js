@@ -36,7 +36,7 @@ module.exports = function(cotaData, templates, context) {
         cotaData.getGroupList().then(showView)
     
         function showView(items) {
-            if (items.message && items.id==60) {
+            if (items.message) {
                 showNonAuthenticated()
                 return
             }
@@ -74,7 +74,7 @@ module.exports = function(cotaData, templates, context) {
         cotaData.getGroup(id).then(showView)
     
         function showView(items) {
-            if (items.message && items.id==60) {
+            if (items.message) {
                 showNonAuthenticated()
                 return
             }
@@ -85,7 +85,7 @@ module.exports = function(cotaData, templates, context) {
 
                 document.querySelector("#btn-edit-group").onclick = editGroup
                 document.querySelector("#btn-series-by-vote").onclick = seriesByVote
-
+                
                 const buttons = document.querySelectorAll("#btn-delete-serie")
                 for (const button of buttons) {
                     button.onclick = deleteSerieToGroup
@@ -120,7 +120,13 @@ module.exports = function(cotaData, templates, context) {
             const serieId = this.value
             location.hash = `group/${groupId}`
             cotaData.deleteSerieFromGroup(groupId, serieId)
-                .then(() => showGroup(groupId))
+                .then((rsp) => {
+                    if (rsp.message) {
+                        showNonAuthenticated()
+                        return
+                    }
+                    showGroup(groupId)
+                })
         }
     }
 
@@ -128,7 +134,7 @@ module.exports = function(cotaData, templates, context) {
         cotaData.getGroupList().then(showView)
     
         function showView(items) {
-            if (items.message && items.id==60) {
+            if (items.message) {
                 showNonAuthenticated()
                 return
             }
@@ -150,7 +156,7 @@ module.exports = function(cotaData, templates, context) {
     }
     
     function showSeriesByVote(groupInfo) {
-        if (items.message && items.id==60) {
+        if (items.message) {
             showNonAuthenticated()
             return
         }

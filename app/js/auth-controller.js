@@ -13,9 +13,9 @@ module.exports = function(cotaData, templates, context) {
         logout : logout
     }
 
-    function showCurrentUserInfo(username) {
-        if (username) {
-            userInfoNavBar.innerHTML = templates.user_loggedin(username)
+    function showCurrentUserInfo(user) {
+        if (user) {
+            userInfoNavBar.innerHTML = templates.user_loggedin(user)
             document.querySelector("#btn-navbar-logout").onclick = goToLogout
         }
         else {
@@ -57,7 +57,7 @@ module.exports = function(cotaData, templates, context) {
             function processLogin(loginStatus) {
                 context.user = { username: loginStatus.username }
                 if (loginStatus.ok) {
-                    Promise.resolve(context.user).then(showCurrentUserInfo)
+                    showCurrentUserInfo(context.user)
                     document.querySelector(".topnav").style.display = "block";
                     location.hash = "tvpopular"
                     return
@@ -75,7 +75,8 @@ module.exports = function(cotaData, templates, context) {
 
             function processRegister(registerStatus) {
                 if (registerStatus.ok) {
-                    errorMsg.textContent = "User created with success."
+                    //errorMsg.textContent = "User created with success."
+                    doLogin()
                     return
                 }
                 errorMsg.textContent = registerStatus.message
