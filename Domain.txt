@@ -1,6 +1,8 @@
 Group:
     - id (Unique String)
-    - user (Owner's Username)
+    - owner (Owner's Username)
+    - collaborators
+    - invites
     - name (Group's Name)
     - description (Group's description)
     - series (Series Array)

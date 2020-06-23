@@ -17,6 +17,7 @@ module.exports = function (_fetch, _error, config = _config) {
         getGroupListAll       : getGroupListAll,
         addGroup              : addGroup,
         getGroup              : getGroup,
+        getGroupsById         : getGroupsById,
         editGroup             : editGroup,
         addSerieToGroup       : addSerieToGroup,
         removeSeriesFromGroup : removeSeriesFromGroup
@@ -24,9 +25,10 @@ module.exports = function (_fetch, _error, config = _config) {
 
     function UriManager() {
         const baseUri = `http://${config.host}:${config.port}/${config.index}/`
-        this.getGroupListAllUri = (username) => `${baseUri}_search?q=username:${username}&size=${config.max_results}`
+        this.getGroupListAllUri = (username) => `${baseUri}_search?q=owner:${username}&size=${config.max_results}`
         this.addGroupUri = () => `${baseUri}_doc`
         this.getGroupUri = (id) => `${baseUri}_doc/${id}`
+        this.getGroupsById = () => `${baseUri}_mget`
         this.editGroupUri = (id) => `${baseUri}_doc/${id}/_update`
         this.addSerieToGroupUri = (id) => `${baseUri}_doc/${id}/_update`
         this.removeSeriesFromGroupUri = (id) => `${baseUri}_doc/${id}/_update`
@@ -49,7 +51,9 @@ module.exports = function (_fetch, _error, config = _config) {
 
     function addGroup(user, groupName, groupDesc) {
         let group = {
-            username: user.username,
+            owner: user.username,
+            collaborators: [user.username],
+            invites: [],
             name: groupName,
             description: groupDesc,
             series: []
@@ -73,7 +77,8 @@ module.exports = function (_fetch, _error, config = _config) {
                 if (!group.found) {
                     return Promise.reject(error.get(10))
                 }
-                if (group._source.username != user.username) {
+
+                if (group._source.owner != user.username && !group._source.collaborators.includes(user.username)) {
                     return Promise.reject(error.get(84))
                 }
 
@@ -91,6 +96,12 @@ module.exports = function (_fetch, _error, config = _config) {
                 })
                 return groupOutput
             })
+    }
+
+    function getGroupsById(user, groupIds) {
+        //Get every group whose id is included in groupIds
+        //Check if user is collaborator or is invited to group
+        //Send different result in case of invite 
     }
 
     function editGroup(user, groupId, name, description) {
