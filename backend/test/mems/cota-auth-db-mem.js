@@ -1,4 +1,4 @@
-const debug = require('debug')('cota:auth-db')
+const debug = require('debug')('cota:auth-db-mem')
 
 module.exports = function (dbFile, _error) {
     const error = _error

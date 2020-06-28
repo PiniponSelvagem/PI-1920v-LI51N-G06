@@ -1,6 +1,9 @@
-const debug = require('debug')('cota:movie-database-data')
 
-module.exports = function (dbFile) {
+const debug = require('debug')('cota:movie-database')
+
+module.exports = function (_fetch) {
+    const fetch = _fetch
+    const movieDbKey = process.env.MOVIE_DB_KEY
 
     return {
         getTvPopular      : getTvPopular,
@@ -19,7 +22,8 @@ module.exports = function (dbFile) {
     }
 
     function getTvSeriesWithID(seriesId) {
-        return Promise.resolve(dbFile.find( series => series.id === seriesId))
+        const url = buildUrl(`/tv/${seriesId}`)
+        return makeRequest(url)
     }
 
 
@@ -31,9 +35,9 @@ module.exports = function (dbFile) {
         for(let k in params) {
             urlParams += `${k}=${params[k]}&`
         }
-
+        
         // encodeURI -> supporting special chars, like spaces, あ, á...
-        return `http://api.themoviedb.org/3${path}?${encodeURI(urlParams)}api_key=${movieDbKey.key}`
+        return `http://api.themoviedb.org/3${path}?${encodeURI(urlParams)}api_key=${movieDbKey}`
     }
 
     function makeRequest(url, options) {

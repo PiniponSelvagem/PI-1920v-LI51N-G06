@@ -1,5 +1,5 @@
 
-const debug = require('debug')('cota:web-api-auth')
+const debug = require('debug')('cota:api-auth')
 const router = require('express').Router()
 
 module.exports = function (_cotaAuthServices, _error) {

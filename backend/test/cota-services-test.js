@@ -3,15 +3,15 @@ var expect = chai.expect;
 
 const error = require('../cota-error')()
 const authDbFile = require('./mocks/auth-db-mem.json')
-const dataDbFile = require('./mocks/data-db-mem.json')
+const groupsDbFile = require('./mocks/groups-db-mem.json')
 const movieDbFile = require('./mocks/movie-db-mem.json')
 
 const cotaAuthDbMem = require('./mems/cota-auth-db-mem')(authDbFile, error)
-const cotaAuthServices = require('../cota-services-auth')(cotaAuthDbMem, error)
+const cotaGroupsDbMem = require('./mems/cota-groups-db-mem')(groupsDbFile, error)
+const movieDbMem = require('./mems/movie-database-data-mem')(movieDbFile)
 
-const cotaDataDbMem = require('./mems/cota-data-db-mem')(dataDbFile, error)
-const movieDataDbMem = require('./mems/movie-database-data-mem')(movieDbFile)
-const cotaDataServices = require('../cota-services-data')(movieDataDbMem, cotaDataDbMem, error)
+const cotaAuthServices = require('../api/auth/cota-services-auth')(cotaAuthDbMem, error)
+const cotaDataServices = require('../api/data/cota-services-data')(movieDbMem, null, cotaGroupsDbMem, null, error)
 
 
 describe('cota-services-___ operations tests', cotaServicesOperationsTests)

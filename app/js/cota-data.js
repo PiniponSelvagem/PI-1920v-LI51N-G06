@@ -47,6 +47,7 @@ const uriManager = new UriManager()
 
 
 ////// Functions executed in each page state
+
 function getTvPopular() {
     return fetch(uriManager.getTvPolularUri())
         .then(rsp => rsp.json())
@@ -93,8 +94,6 @@ function deleteSerieFromGroup(groupId, serieId) {
         }
     }).then(rsp => rsp.json())
 }
-
-
 
 function register(username, password) {
     const credentials = {

@@ -1,4 +1,4 @@
-const debug = require('debug')('cota:data-db')
+const debug = require('debug')('cota:groups-db-mem')
 
 
 module.exports = function (dbFile, _error) {

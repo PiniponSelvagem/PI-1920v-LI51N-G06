@@ -4,8 +4,8 @@ const debug = require('debug')('cota:auth-db')
 const _config = {
     host: 'localhost',
     port: 9200,
-    index: "cota_users",
-    //max_results: 1000 // max results returned by elasticsearch -> DEFAULT: 10
+    index: "cota-users",
+    max_results: 1
 }
 
 module.exports = function (_fetch, _error, config = _config) {

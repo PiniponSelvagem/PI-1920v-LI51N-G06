@@ -1,12 +1,14 @@
+const debug = require('debug')('cota:services-data')
 
-const debug = require('debug')('cota:data-services')
-
-module.exports = function (_movieDb, _cotaDb, _error) {
+module.exports = function (_movieDb, _usersDb, _groupsDb, _invitesDb, _error) {
     const movieDb = _movieDb
-    const cotaDb = _cotaDb
+    const usersDb = _usersDb
+    const groupsDb = _groupsDb
+    const invitesDb = _invitesDb
     const error = _error
 
     return {
+        getUser               : getUser,
         getTvPopular          : getTvPopular,
         getTvSearch           : getTvSearch,
         getGroupListAll       : getGroupListAll,
@@ -15,9 +17,14 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         editGroup             : editGroup,
         addSerieToGroup       : addSerieToGroup,
         removeSeriesFromGroup : removeSeriesFromGroup,
-        getGroupSeriesByVote  : getGroupSeriesByVote
+        getGroupSeriesByVote  : getGroupSeriesByVote,
+        getInvitations        : getInvitations
     }
 
+    function getUser(username) {
+        //return usersDb.getUser(username)
+    }
+    
     function getTvPopular() {
         return movieDb.getTvPopular()
     }
@@ -27,7 +34,7 @@ module.exports = function (_movieDb, _cotaDb, _error) {
     }
 
     function getGroupListAll(user) {
-        return cotaDb.getGroupListAll(user)
+        return groupsDb.getGroupListAll(user)
     }
 
     function addGroup(user, groupName, groupDesc) {
@@ -35,15 +42,15 @@ module.exports = function (_movieDb, _cotaDb, _error) {
             return Promise.reject(error.get(20))
         }
         
-        return cotaDb.addGroup(user, groupName, groupDesc)
+        return groupsDb.addGroup(user, groupName, groupDesc)
     }
 
     function getGroup(user, id) {
-        return cotaDb.getGroup(user, id)
+        return groupsDb.getGroup(user, id)
     }
 
     function editGroup(user, id, name, description) {
-        return cotaDb.editGroup(user, id, name, description)
+        return groupsDb.editGroup(user, id, name, description)
     }
 
     function addSerieToGroup(user, groupId, seriesId) {
@@ -56,12 +63,12 @@ module.exports = function (_movieDb, _cotaDb, _error) {
                     description: series.overview,
                     original_language: series.original_language
                 }
-                return cotaDb.addSerieToGroup(user, groupId, formatedSeries)
+                return groupsDb.addSerieToGroup(user, groupId, formatedSeries)
             })
     }
 
     function removeSeriesFromGroup(user, groupId, seriesId) {
-        return cotaDb.removeSeriesFromGroup(user, groupId, seriesId)
+        return groupsDb.removeSeriesFromGroup(user, groupId, seriesId)
     }
 
     function getGroupSeriesByVote(user, groupId, min = 0, max = 10) {
@@ -70,7 +77,7 @@ module.exports = function (_movieDb, _cotaDb, _error) {
             debug("God help me")
             return Promise.reject(error.get(22))
         }
-        return cotaDb.getGroup(user, groupId)
+        return groupsDb.getGroup(user, groupId)
             .then(group =>
                 group.series.map( series => {
                     return movieDb.getTvSeriesWithID(series.id)
@@ -92,6 +99,10 @@ module.exports = function (_movieDb, _cotaDb, _error) {
                 mappedSeries
                     .filter(series => series.vote_average >= min && series.vote_average <= max)
                     .sort((s1,s2) => s2.vote_average - s1.vote_average))
+    }
+
+    function getInvitations(user) {
+        return groupsDb.getInvitations(user)
     }
 
     ///////////////////

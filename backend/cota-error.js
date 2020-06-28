@@ -1,5 +1,5 @@
 
-const errorList = require('./json_files/COTA_ERROR')
+const errorList = require('./constants/COTA_ERROR')
 
 module.exports = function () {
     return {

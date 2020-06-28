@@ -1,10 +1,10 @@
 
-const debug = require('debug')('cota:data-db')
+const debug = require('debug')('cota:groups-db')
 
 const _config = {
     host: 'localhost',
     port: 9200,
-    index: "cota",
+    index: "cota-groups",
     max_results: 1000 // max results returned by elasticsearch -> DEFAULT: 10
 }
 
@@ -132,7 +132,6 @@ module.exports = function (_fetch, _error, config = _config) {
         let script = {
             script: {
                 inline: "ctx._source.series.add(params.serie)",
-                lang: "painless",
                 params: { serie: serie }
             }
         }

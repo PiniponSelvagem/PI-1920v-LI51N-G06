@@ -1,5 +1,5 @@
 
-const debug = require('debug')('cota:web-api-data')
+const debug = require('debug')('cota:api-data')
 const router = require('express').Router()
 
 module.exports = function (_cotaDataServices, _error) {
@@ -15,17 +15,18 @@ module.exports = function (_cotaDataServices, _error) {
     router.post('/series/group/:gid/series', addSerieToGroup)
     router.delete('/series/group/:gid/series/:sid', removeSeriesFromGroup)
     router.get('/series/group/:gid/series', getGroupSeriesByVote)
+    router.get('/series/group/:gid/invitations', getGroupSeriesByVote)
 
     return router
 
     // GET .../tv/popular
     function getTvPopular(req, rsp) {
-        cotaDataServices.getTvPopular().sendResponse(rsp)
+        cotaTvServices.getTvPopular().sendResponse(rsp)
     }
 
     // GET .../tv/search
     function getTvSearch(req, rsp) {
-        cotaDataServices.getTvSearch(req.query).sendResponse(rsp)
+        cotaTvServices.getTvSearch(req.query).sendResponse(rsp)
     }
 
     // GET .../series/group/list

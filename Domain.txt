@@ -1,17 +1,28 @@
 Group:
-    - id (Unique String)
+    - _id (Unique String)
     - owner (Owner's Username)
     - collaborators
-    - invites
     - name (Group's Name)
     - description (Group's description)
     - series (Series Array)
 
 Series:
-    - id (Unique Number)
+    - _id (Unique Number)
     - original_name (Series Original Name)
     - name (Series Name)
+    - description
+    - original_language
 
 User:
+    - _id
     - username (Username)
     - password (Password unrestricted)
+
+Invite:
+    - _id
+    - groupId
+    - from
+    - to
+    
+    
+
