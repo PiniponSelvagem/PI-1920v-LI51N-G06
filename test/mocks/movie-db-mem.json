@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "original_name": "serie1",
+    "name": "s1",
+    "description": "this is serie 1",
+    "original_language": "pt"
+  },
+  {
+    "id": 2,
+    "original_name": "serie2",
+    "name": "s2",
+    "description": "this is serie 2",
+    "original_language": "pt"
+  },
+  {
+    "id": 3,
+    "original_name": "serie3",
+    "name": "s3",
+    "description": "this is serie 3",
+    "original_language": "pt"
+  },
+  {
+    "id": 4,
+    "original_name": "serie4",
+    "name": "s4",
+    "description": "this is serie 4",
+    "original_language": "pt"
+  },
+  {
+    "id": 5,
+    "original_name": "serie5",
+    "name": "s5",
+    "description": "this is serie 5",
+    "original_language": "pt"
+  }
+
+]
