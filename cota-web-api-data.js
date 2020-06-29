@@ -53,11 +53,6 @@ module.exports = function (_cotaDataServices, _error) {
     // GET .../series/group/:gid
     function getGroup(req, rsp) {
         cotaDataServices.getGroup(req.user, req.params.gid).sendResponse(rsp)
-        /*
-        req.isAuthenticated()
-            ? cotaDataServices.getGroup(req.user, req.params.gid).sendResponse(rsp)
-            : Promise.reject(error.get(60)).sendResponse(rsp)
-        */
     }
 
     // POST .../series/group/:gid
@@ -83,9 +78,7 @@ module.exports = function (_cotaDataServices, _error) {
 
     // GET .../series/group/:gid/series
     function getGroupSeriesByVote(req, rsp) {
-        req.isAuthenticated()
-            ? cotaDataServices.getGroupSeriesByVote(req.user, req.params.gid, req.query.min, req.query.max).sendResponse(rsp)
-            : Promise.reject(error.get(60)).sendResponse(rsp)
+        cotaDataServices.getGroupSeriesByVote(req.user, req.params.gid, req.query.min, req.query.max).sendResponse(rsp)
     }
 
 

@@ -1,3 +1,4 @@
+const { getGroupListPublic } = require('./app/js/cota-data')
 
 const debug = require('debug')('cota:data-db')
 
@@ -176,8 +177,15 @@ module.exports = function (_fetch, _error) {
     }
     
     async function findGroup(user, groupId) {
-        let groups = await getGroupListAll(user)
-        return findById(user, groupId, groups)
+        return getGroupPublicListAll()
+                .then(groups => findById(user, groupId, groups))
+                .then(group => {
+                    if (!group) {
+                        return getGroupListAll(user)
+                                    .then(groups => findById(user, groupId, groups))
+                    }
+                    return group
+                })
     }
 
 
