@@ -21,11 +21,13 @@ module.exports = function(cotaData, templates, context) {
             userInfoNavBar.innerHTML = templates.user_loggedin(user)
             document.querySelector("#btn-navbar-logout").onclick = goToLogout
             document.querySelector("#group-list-button").style.display = "block";
+            document.querySelector("#invite-list-button").style.display = "block";
         }
         else {
             userInfoNavBar.innerHTML = templates.user_loggedout()
             document.querySelector("#btn-navbar-login").onclick = goToLogin
             document.querySelector("#group-list-button").style.display = "none"
+            document.querySelector("#invite-list-button").style.display = "none";
         }
 
         function goToLogin() {

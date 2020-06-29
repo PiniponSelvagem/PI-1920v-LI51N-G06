@@ -134,6 +134,7 @@ button:hover {
 
 table  {
     border-collapse: collapse;
+    margin-top: 10px;
 }
 table td, table th {
     border: 1px solid #ddd;

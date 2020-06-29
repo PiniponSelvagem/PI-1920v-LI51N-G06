@@ -1,0 +1,23 @@
+<section id="show-invites">
+    <h1>Invites</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Group Id</th>
+                <th>From</th>
+                <th id="th-button"></th>
+                <th id="th-button"></th>
+            </tr>
+        </thead>
+        <tbody id="items">
+            {{#each this}}
+            <tr>
+                <td>{{groupId}}</td>
+                <td>{{from}}</td>
+                <td><button id="btn-accept-invite" value={{id}}>accept</button></td>
+                <td><button id="btn-decline-invite" value={{id}}>decline</button></td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</section>

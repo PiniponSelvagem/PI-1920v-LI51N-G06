@@ -1,5 +1,5 @@
 
-const debug = require('debug')('cota:invites-db')
+const debug = require('debug')('cota:users-db')
 
 const _config = {
     host: 'localhost',
@@ -14,30 +14,39 @@ module.exports = function (_fetch, _error, config = _config) {
     const uriManager = new UriManager()
 
     return {
-        //TODO
-
+        getUser : getUser
     }
 
     function UriManager() {
         const baseUri = `http://${config.host}:${config.port}/${config.index}/`
-        //TODO
+        this.getUserUri = (username) => `${baseUri}_search?q=username:${username}`
+        this.refresh = () => `${baseUri}_refresh`
     }
 
-    //TODO
+    function getUser(username) {
+        return makeRequest(uriManager.getUserUri(username))
+            .then(rsp => {
+                if(rsp.error || rsp.hits.total.value == 0) {
+                    return Promise.reject(error.get(80))
+                }
+                
+                const user = rsp.hits.hits[0]._source
+
+                return {username: user.username}
+            })
+    }
 
     
     ///////////////////
     // AUX functions //
     ///////////////////
-    function makeRequest(uri, options, refresh) {
+    async function makeRequest(uri, options, refresh) {
         debug(`request to (ElasticSearch) ${uri}`)
-        return fetch(uri, options)
-            .then(async rsp => {
-                if (refresh) {
-                    await fetch(uriManager.refresh())
-                }
-                return rsp;
-            })
+        const result = await fetch(uri, options)
             .then(rsp => rsp.json())
+        if (refresh) {
+            await fetch(uriManager.refresh())
+        }
+        return result
     }
 }

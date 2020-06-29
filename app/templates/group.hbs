@@ -1,7 +1,7 @@
 <section id="show-group">
     <h1>Group: {{name}}</h1>
     <h3>Description: {{description}}</h3>
-    <div id="series-content"/>
+    <div id="series-container"/>
 </section>
 
 <div class="data-forms">
@@ -26,5 +26,16 @@
         <button id="btn-edit-group">
             Edit Group
         </button>
+    </section>
+
+    <section id="invite-collaborator">
+        <h2>Invite new Collaborators</h2>
+        <div class="data-invite">
+            <div>
+                <span>Username: </span><input type="text" id="invite-name"/>
+                <button id="btn-invite">Invite</button>
+            </div>
+        </div>
+        <div id="invites-container"/>
     </section>
 </div>

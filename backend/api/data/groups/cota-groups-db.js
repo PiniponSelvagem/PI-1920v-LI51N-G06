@@ -17,43 +17,58 @@ module.exports = function (_fetch, _error, config = _config) {
         getGroupListAll       : getGroupListAll,
         addGroup              : addGroup,
         getGroup              : getGroup,
-        getGroupsById         : getGroupsById,
         editGroup             : editGroup,
         addSerieToGroup       : addSerieToGroup,
-        removeSeriesFromGroup : removeSeriesFromGroup
+        removeSeriesFromGroup : removeSeriesFromGroup,
+        addCollaborator       : addCollaborator 
     }
 
     function UriManager() {
         const baseUri = `http://${config.host}:${config.port}/${config.index}/`
-        this.getGroupListAllUri = (username) => `${baseUri}_search?q=owner:${username}&size=${config.max_results}`
+        this.getGroupListAllUri = () => `${baseUri}_search`
         this.addGroupUri = () => `${baseUri}_doc`
         this.getGroupUri = (id) => `${baseUri}_doc/${id}`
-        this.getGroupsById = () => `${baseUri}_mget`
         this.editGroupUri = (id) => `${baseUri}_doc/${id}/_update`
         this.addSerieToGroupUri = (id) => `${baseUri}_doc/${id}/_update`
         this.removeSeriesFromGroupUri = (id) => `${baseUri}_doc/${id}/_update`
+        this.addCollaboratorUri = (id) => `${baseUri}_doc/${id}/_update`
         this.refresh = () => `${baseUri}_refresh`
     }
 
     function getGroupListAll(user) {
-        const uri = uriManager.getGroupListAllUri(user.username)
-        return makeRequest(uri)
-            .then(body => body.hits.hits.map(
+        const body = {
+            query: {
+                query_string: {
+                    default_field: "collaborators",
+                    query: user.username
+                }
+            }
+        }
+
+        const options = {
+            body: JSON.stringify(body),
+            headers: { 'Content-Type': 'application/json'}
+        }
+
+        const uri = uriManager.getGroupListAllUri()
+        return makeRequest(uri, options)
+            .then(body => {
+                console.log(body)
+                body.hits.hits.map(
                 group => {
                     return {
                         id: group._id,
                         name: group._source.name,
                         description: group._source.description
                     }
-                }))
-            .then(body => { debug(`getGroupListAll found ${body.length} groups`); return body; })
+                })})
+            .then(groups => { debug(`getGroupListAll found ${groups.length} groups`); return groups; })
     }
 
     function addGroup(user, groupName, groupDesc) {
         let group = {
             owner: user.username,
             collaborators: [user.username],
-            invites: [],
             name: groupName,
             description: groupDesc,
             series: []
@@ -73,21 +88,23 @@ module.exports = function (_fetch, _error, config = _config) {
     function getGroup(user, groupId) {
         const uri = uriManager.getGroupUri(groupId)
         return makeRequest(uri)
-            .then(group => {
-                if (!group.found) {
+            .then(rsp => {
+                if (!rsp.found) {
                     return Promise.reject(error.get(10))
                 }
-
-                if (group._source.owner != user.username && !group._source.collaborators.includes(user.username)) {
+                const group = rsp._source
+                if (!group.collaborators.includes(user.username)) {
                     return Promise.reject(error.get(84))
                 }
 
                 let groupOutput = {
-                    id: group._id,
-                    name: group._source.name,
-                    description: group._source.description
+                    id: rsp._id,
+                    owner: group.owner,
+                    collaborators: group.collaborators,
+                    name: group.name,
+                    description: group.description
                 }
-                groupOutput.series = group._source.series.map(series => {
+                groupOutput.series = group.series.map(series => {
                     return {
                             id: series.id,
                             original_name: series.original_name,
@@ -96,12 +113,6 @@ module.exports = function (_fetch, _error, config = _config) {
                 })
                 return groupOutput
             })
-    }
-
-    function getGroupsById(user, groupIds) {
-        //Get every group whose id is included in groupIds
-        //Check if user is collaborator or is invited to group
-        //Send different result in case of invite 
     }
 
     function editGroup(user, groupId, name, description) {
@@ -177,19 +188,46 @@ module.exports = function (_fetch, _error, config = _config) {
             .then(sid => { debug(`removed serie with id: ${serieId} from group with id: ${groupId}`); return sid; })
         )
     }
+
+    function addCollaborator(user, groupId) {
+        let script = {
+            script: {
+                inline: "ctx._source.collaborators.add(params.user)",
+                params: { user: `${user.username}` }
+            }
+        }
+
+        const uri = uriManager.addCollaboratorUri(groupId)
+        const options = {
+            method: "POST",
+            body: JSON.stringify(script),
+            headers: { 'Content-Type': 'application/json'}
+        }
+
+        return makeRequest(uri, options, true)
+            .then(body => {
+                if (body.error) {
+                    return Promise.reject(error.get(10))
+                }
+                return body
+            })
+            .then(body => { debug(`added collaborator to group with id: ${body._id}`); return body.result; })
+    }
     
     ///////////////////
     // AUX functions //
     ///////////////////
-    function makeRequest(uri, options, refresh) {
+    async function makeRequest(uri, options, refresh) {
         debug(`request to (ElasticSearch) ${uri}`)
-        return fetch(uri, options)
-            .then(async rsp => {
-                if (refresh) {
-                    await fetch(uriManager.refresh())
-                }
-                return rsp;
-            })
+        const result = await fetch(uri, options)
             .then(rsp => rsp.json())
+            .then(json => {
+                console.log(json)
+                return json
+            })
+        if (refresh) {
+            await fetch(uriManager.refresh())
+        }
+        return result
     }
 }

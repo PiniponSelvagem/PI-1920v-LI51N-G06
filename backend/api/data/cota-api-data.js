@@ -15,18 +15,21 @@ module.exports = function (_cotaDataServices, _error) {
     router.post('/series/group/:gid/series', addSerieToGroup)
     router.delete('/series/group/:gid/series/:sid', removeSeriesFromGroup)
     router.get('/series/group/:gid/series', getGroupSeriesByVote)
-    router.get('/series/group/:gid/invitations', getGroupSeriesByVote)
+    router.post('/series/group/:gid/invites', inviteToGroup)
+    router.delete('/series/group/:gid/invites', cancelInvite)
+    router.get('/invites', getInvites)
+    router.post('/invites/:iid', answerInvite)
 
     return router
 
     // GET .../tv/popular
     function getTvPopular(req, rsp) {
-        cotaTvServices.getTvPopular().sendResponse(rsp)
+        cotaDataServices.getTvPopular().sendResponse(rsp)
     }
 
     // GET .../tv/search
     function getTvSearch(req, rsp) {
-        cotaTvServices.getTvSearch(req.query).sendResponse(rsp)
+        cotaDataServices.getTvSearch(req.query).sendResponse(rsp)
     }
 
     // GET .../series/group/list
@@ -76,5 +79,33 @@ module.exports = function (_cotaDataServices, _error) {
         req.isAuthenticated()
             ? cotaDataServices.getGroupSeriesByVote(req.user, req.params.gid, parseFloat(req.query.min), parseFloat(req.query.max)).sendResponse(rsp)
             : Promise.reject(error.get(60)).sendResponse(rsp)
+    }
+
+    // POST /series/group/:gid/invites
+    function inviteToGroup(req, rsp) {
+        req.isAuthenticated()
+        ? cotaDataServices.inviteToGroup(req.user, req.params.gid, req.body.to).sendResponse(rsp)
+        : Promise.reject(error.get(60)).sendResponse(rsp)
+    }
+
+    // DELETE /series/group/:gid/invites
+    function cancelInvite(req, rsp) {
+        req.isAuthenticated()
+        ? cotaDataServices.cancelInvite(req.user, req.params.gid, req.body.id).sendResponse(rsp)
+        : Promise.reject(error.get(60)).sendResponse(rsp)
+    }
+
+    // GET /invites
+    function getInvites(req, rsp) {
+        req.isAuthenticated()
+        ? cotaDataServices.getInvites(req.user).sendResponse(rsp)
+        : Promise.reject(error.get(60)).sendResponse(rsp)
+    }
+
+    // POST /invites/:iid
+    function answerInvite(req, rsp) {
+        req.isAuthenticated()
+        ? cotaDataServices.answerInvite(req.user, req.params.iid, req.body.answer).sendResponse(rsp)
+        : Promise.reject(error.get(60)).sendResponse(rsp)
     }
 }

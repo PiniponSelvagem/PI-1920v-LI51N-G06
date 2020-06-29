@@ -79,16 +79,14 @@ module.exports = function (_fetch, _error, config = _config) {
     ///////////////////
     // AUX functions //
     ///////////////////
-    function makeRequest(uri, options, refresh) {
+    async function makeRequest(uri, options, refresh) {
         debug(`request to (ElasticSearch) ${uri}`)
-        return fetch(uri, options)
-            .then(async rsp => {
-                if (refresh) {
-                    await fetch(uriManager.refresh())
-                }
-                return rsp;
-            })
+        const result = await fetch(uri, options)
             .then(rsp => rsp.json())
+        if (refresh) {
+            await fetch(uriManager.refresh())
+        }
+        return result
     }
 
     function setPostOptions(data) {

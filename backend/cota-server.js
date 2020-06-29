@@ -12,19 +12,19 @@ passport.deserializeUser(deserializeUser);
 
 Promise.prototype.sendResponse = sendResponse
 
-const error = require('./backend/cota-error')()
+const error = require('./cota-error')()
 
-const movieDb = require('./backend/api/data/tv/movie-database')(fetch)
-const cotaAuthDb = require('./backend/api/auth/cota-auth-db')(fetch, error)
-const cotaUsersDb = require('./backend/api/data/users/cota-users-db')(fetch, error)
-const cotaGroupsDb = require('./backend/api/data/groups/cota-groups-db')(fetch, error)
-const cotaInvitesDb = require('./backend/api/data/invites/cota-invites-db')(fetch, error)
+const movieDb = require('./api/data/tv/movie-database')(fetch)
+const cotaAuthDb = require('./api/auth/cota-auth-db')(fetch, error)
+const cotaUsersDb = require('./api/data/users/cota-users-db')(fetch, error)
+const cotaGroupsDb = require('./api/data/groups/cota-groups-db')(fetch, error)
+const cotaInvitesDb = require('./api/data/invites/cota-invites-db')(fetch, error)
 
-const cotaDataServices = require('./backend/api/data/cota-services-data')(movieDb, cotaUsersDb, cotaGroupsDb, cotaInvitesDb, error)
-const cotaAuthServices = require('./backend/api/auth/cota-services-auth')(cotaAuthDb, error)
+const cotaDataServices = require('./api/data/cota-services-data')(movieDb, cotaUsersDb, cotaGroupsDb, cotaInvitesDb, error)
+const cotaAuthServices = require('./api/auth/cota-services-auth')(cotaAuthDb, error)
 
-const dataApi = require('./backend/api/data/cota-api-data')(cotaDataServices, error)
-const authApi = require('./backend/api/auth/cota-api-auth')(cotaAuthServices, error)
+const dataApi = require('./api/data/cota-api-data')(cotaDataServices, error)
+const authApi = require('./api/auth/cota-api-auth')(cotaAuthServices, error)
 
 const app = express()
 

@@ -1,0 +1,18 @@
+<table id="invites-table">
+    <thead>
+        <tr>
+            <th>Invited</th>
+            <th>By</th>
+            <th id="th-button"></th>
+        </tr>
+    </thead>
+    <tbody id="items">
+        {{#each invites}}
+        <tr>
+            <td>{{to}}</td>
+            <td>{{from}}</td>
+            <td><button id="btn-cancel-invite" value={{id}}>cancel</button></td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

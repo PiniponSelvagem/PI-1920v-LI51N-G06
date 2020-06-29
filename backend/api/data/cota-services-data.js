@@ -1,3 +1,5 @@
+const { answerInvite } = require('../../../app/js/cota-data')
+
 const debug = require('debug')('cota:services-data')
 
 module.exports = function (_movieDb, _usersDb, _groupsDb, _invitesDb, _error) {
@@ -18,7 +20,10 @@ module.exports = function (_movieDb, _usersDb, _groupsDb, _invitesDb, _error) {
         addSerieToGroup       : addSerieToGroup,
         removeSeriesFromGroup : removeSeriesFromGroup,
         getGroupSeriesByVote  : getGroupSeriesByVote,
-        getInvitations        : getInvitations
+        inviteToGroup         : inviteToGroup,
+        cancelInvite          : cancelInvite,
+        getInvites            : getInvites,
+        answerInvite          : answerInvite
     }
 
     function getUser(username) {
@@ -47,6 +52,13 @@ module.exports = function (_movieDb, _usersDb, _groupsDb, _invitesDb, _error) {
 
     function getGroup(user, id) {
         return groupsDb.getGroup(user, id)
+            .then(group => {
+                return invitesDb.getGroupInvites(id)
+                    .then(invites => {
+                        group.invites = invites
+                        return group
+                    })
+            })
     }
 
     function editGroup(user, id, name, description) {
@@ -101,13 +113,46 @@ module.exports = function (_movieDb, _usersDb, _groupsDb, _invitesDb, _error) {
                     .sort((s1,s2) => s2.vote_average - s1.vote_average))
     }
 
-    function getInvitations(user) {
-        return groupsDb.getInvitations(user)
+    function inviteToGroup(user, groupId, invitedUser) {
+        return usersDb.getUser(invitedUser)
+                .then( _=> groupsDb.getGroup(user, groupId))
+                .then(group => {
+                    if(group.collaborators.includes(invitedUser)) {
+                        return Promise.reject(error.get(41))
+                    }
+                })
+                .then( _=> invitesDb.addInvite(user, groupId, invitedUser))
+
+    }
+
+    function cancelInvite(user, groupId, inviteId) {
+        return groupsDb.getGroup(user, groupId)
+                .then(_=> invitesDb.deleteInvite(inviteId, groupId))
+                .then(_ => invitesDb.getGroupInvites(groupId))
+    }
+
+    function getInvites(user) {
+        return invitesDb.getInvites(user)
+    }
+
+    function answerInvite(user, inviteId, answer) {
+        return invitesDb.getInvite(user, inviteId)
+            .then(invite => {
+                console.log(invite)
+                if(answer == "accept") {
+                    return groupsDb.addCollaborator(user, invite.groupId)
+                        .then(_ => invitesDb.deleteInvite(inviteId, invite.groupId))
+                        .then(_ => invitesDb.getInvites(user))
+                }
+
+                return invitesDb.deleteInvite(inviteId, invite.groupId)
+                    .then(_ => invitesDb.getInvites(user))
+            })
     }
 
     ///////////////////
     // AUX functions //
-    ///////////////////
+    //////////////////
     function isInvalidRange(min, max) {
         return min > max || min < 0 || max > 10
     }

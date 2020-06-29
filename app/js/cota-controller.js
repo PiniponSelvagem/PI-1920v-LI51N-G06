@@ -7,13 +7,46 @@ module.exports = function(cotaData, templates, context) {
         grouplist          : showGroupList,
         group              : showGroup,
         seriegroupselector : showSerieAddGroupList,
+        invites            : showInvites,
         nonauthenticated   : showNonAuthenticated
+    }
+
+    function showInvites() {
+        cotaData.getInvites().then(showView)
+    
+        function showView(rsp) {
+            mainContent.innerHTML = templates.invites(rsp.result)
+
+            let buttons = document.querySelectorAll("#btn-accept-invite")
+            for (const button of buttons) {
+                button.onclick = acceptInvite
+            }
+
+            buttons = document.querySelectorAll("#btn-decline-invite")
+            for (const button of buttons) {
+                button.onclick = declineInvite
+            }
+
+        }
+
+        function acceptInvite() {
+            const inviteId = this.value
+            cotaData.answerInvite(inviteId, "accept")
+                .then(() => showInvites())
+        }
+
+        function declineInvite() {
+            const inviteId = this.value
+            cotaData.answerInvite(inviteId, "decline")
+                .then(() => showInvites())
+        }
     }
 
     function showTvPopular() {
         cotaData.getTvPopular().then(showView)
     
         function showView(rsp) {
+            document.querySelector(".topnav").style.display = "block";
             mainContent.innerHTML = templates.tvpopular(rsp.result.results)
         }
     }
@@ -62,16 +95,26 @@ module.exports = function(cotaData, templates, context) {
             }
             else {
                 mainContent.innerHTML = templates.group(rsp.result)
-                const table = document.querySelector("#series-content")
-                table.innerHTML = templates.group_series(rsp.result)
+                
+                const seriesContainer = document.querySelector("#series-container")
+                seriesContainer.innerHTML = templates.group_series(rsp.result)
 
-                document.querySelector("#btn-edit-group").onclick = editGroup
-                document.querySelector("#btn-series-by-vote").onclick = seriesByVote
-
-                const buttons = document.querySelectorAll("#btn-delete-serie")
+                let buttons = document.querySelectorAll("#btn-delete-serie")
                 for (const button of buttons) {
                     button.onclick = deleteSerieToGroup
                 }
+
+                document.querySelector("#btn-edit-group").onclick = editGroup
+                document.querySelector("#btn-series-by-vote").onclick = seriesByVote
+                document.querySelector("#btn-invite").onclick = inviteToGroup
+
+                const invitesContainer = document.querySelector("#invites-container")
+                invitesContainer.innerHTML = templates.group_invites({invites:rsp.result.invites})
+                buttons = document.querySelectorAll("#btn-cancel-invite")
+                for (const button of buttons) {
+                    button.onclick = cancelInvite
+                }
+
             }
         }
 
@@ -97,12 +140,46 @@ module.exports = function(cotaData, templates, context) {
                 .then(rsp => rsp.error ? showError(rsp.error) : showSeriesByVote(rsp))
         }
 
+        function inviteToGroup() {
+            const group = {
+                id: window.location.hash.substring(1).split("/")[1]
+            }
+            const inviteName = document.querySelector("#invite-name").value
+
+            cotaData.inviteToGroup(group.id, inviteName)
+                .then(rsp => rsp.error ? showError(rsp.error) : showGroupInvites(rsp))
+        }
+
+        function cancelInvite() {
+            console.log("Clicked")
+            const group = {
+                id: window.location.hash.substring(1).split("/")[1]
+            }
+            const inviteId = this.value
+
+            cotaData.cancelInvite(group.id, inviteId)
+                .then(rsp => rsp.error ? showError(rsp.error) : showGroupInvites(rsp))
+        }
+
         function deleteSerieToGroup() {
             const groupId = window.location.hash.substring(1).split("/")[1]
             const serieId = this.value
             location.hash = `group/${groupId}`
             cotaData.deleteSerieFromGroup(groupId, serieId)
                 .then(() => showGroup(groupId))
+        }
+
+        function showGroupInvites(rsp) {
+            if (rsp.error && rsp.error.id==60) {
+                showNonAuthenticated()
+                return
+            }
+            const invitesContainer = document.querySelector("#invites-container")
+            invitesContainer.innerHTML = templates.group_invites({invites:rsp.result})
+            const buttons = document.querySelectorAll("#btn-cancel-invite")
+            for (const button of buttons) {
+                button.onclick = cancelInvite
+            }
         }
     }
 
@@ -136,8 +213,8 @@ module.exports = function(cotaData, templates, context) {
             showNonAuthenticated()
             return
         }
-        const table = document.querySelector("#series-content")
-        table.innerHTML = templates.group_seriesbyvote({series:rsp.result})
+        const seriesContainer = document.querySelector("#series-container")
+        seriesContainer.innerHTML = templates.group_seriesbyvote({series:rsp.result})
     }
 
     function showNonAuthenticated() {    

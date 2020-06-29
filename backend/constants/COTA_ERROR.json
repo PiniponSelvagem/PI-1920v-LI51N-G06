@@ -18,10 +18,14 @@
         { "id": 24, "severity": 1, "message": "Invalid serie id. Valid id is a numeric value." },
 
         { "id": 40, "severity": 1, "message": "Requested group already has this serie." },
+        { "id": 41, "severity": 1, "message": "User is already invited or a member of the Group." },
 
         { "id": 60, "severity": 0, "message": "Please login to access this resource." },
 
-        { "id": 80, "severity": 0, "message": "That user dosent exist in our database. Check if username is correct or register." },
+        { "id": 75, "severity": 0, "message": "That Invite doesn't exist in our database. Check if the Invite Id is correct."},
+        { "id": 76, "severity": 0, "message": "Group Id doesn't match Invite."},
+
+        { "id": 80, "severity": 0, "message": "That user doesn't exist in our database. Check if username is correct." },
         { "id": 81, "severity": 0, "message": "That username is already taken :(" },
         { "id": 82, "severity": 0, "message": "Incorrect password, try again." },
         { "id": 83, "severity": 2, "message": "Error when creating user. Please contact the administrator." },

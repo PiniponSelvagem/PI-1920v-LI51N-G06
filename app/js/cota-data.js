@@ -8,6 +8,10 @@ module.exports = {
     addSerieToGroup      : addSerieToGroup,
     getSeriesByVote      : getSeriesByVote,
     deleteSerieFromGroup : deleteSerieFromGroup,
+    inviteToGroup        : inviteToGroup,
+    cancelInvite         : cancelInvite,
+    getInvites           : getInvites,
+    answerInvite         : answerInvite,
 
     register       : register,
     login          : login,
@@ -34,6 +38,10 @@ function UriManager() {
     this.getSerieAddGroupUri = (id) => `${dataUri}series/group/${id}/series`
     this.getSeriesByVoteUri = (id, min, max) => `${dataUri}series/group/${id}/series?min=${min}&max=${max}`
     this.getDeleteSerieFromGroupUri = (groupId, serieId) => `${dataUri}series/group/${groupId}/series/${serieId}`
+    this.inviteToGroupUri = (groupId) => `${dataUri}series/group/${groupId}/invites`
+    this.cancelInviteUri = (groupId) => `${dataUri}series/group/${groupId}/invites`
+    this.getInvitesUri = () => `${dataUri}invites`
+    this.answerInviteUri = (inviteId) => `${dataUri}invites/${inviteId}`
 
     const authUri = `http://${config.host}:${config.port}/${config.baseApi}/${config.auth}`
     this.getRegisterUri = () => `${authUri}register`
@@ -49,51 +57,67 @@ const uriManager = new UriManager()
 ////// Functions executed in each page state
 
 function getTvPopular() {
-    return fetch(uriManager.getTvPolularUri())
-        .then(rsp => rsp.json())
+    return doFetch(uriManager.getTvPolularUri(), "GET")
 }
 
 function getTvSearch(query) {
-    return fetch(uriManager.getTvSearchUri(query))
-        .then(rsp => rsp.json())
+    return doFetch(uriManager.getTvSearchUri(query), "GET")
 }
 
 function getGroupList() {
-    return fetch(uriManager.getGroupListUri())
-        .then(rsp => rsp.json())
+    return doFetch(uriManager.getGroupListUri(), "GET")
 }
 
 function getGroup(id) {
-    return fetch(uriManager.getGroupUri(id))
-        .then(rsp => rsp.json())
+    return doFetch(uriManager.getGroupUri(id), "GET")
 }
 
 function createGroup(group) {
-    return doPost(uriManager.getAddGroupUri(), group)
+    return doFetch(uriManager.getAddGroupUri(), "POST", group)
 }
 
 function editGroup(id, group) {
-    return doPost(uriManager.getEditGroupUri(id), group)
+    return doFetch(uriManager.getEditGroupUri(id), "POST", group)
 }
 
 function addSerieToGroup(groupId, serieId) {
     const serie = { id: serieId }
-    return doPost(uriManager.getSerieAddGroupUri(groupId), serie)
+    return doFetch(uriManager.getSerieAddGroupUri(groupId), "POST", serie)
 }
 
 function getSeriesByVote(groupId, voteRange) {
-    return fetch(uriManager.getSeriesByVoteUri(groupId, voteRange.votelow, voteRange.votehigh))
-        .then(rsp => rsp.json())
+    return doFetch(uriManager.getSeriesByVoteUri(groupId, voteRange.votelow, voteRange.votehigh), "GET")
 }
 
 function deleteSerieFromGroup(groupId, serieId) {
-    return fetch(uriManager.getDeleteSerieFromGroupUri(groupId, serieId), {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        }
-    }).then(rsp => rsp.json())
+    return doFetch(uriManager.getDeleteSerieFromGroupUri(groupId, serieId), "DELETE")
 }
+
+function inviteToGroup(groupId, inviteName) {
+    const body = { to: inviteName }
+    return doFetch(uriManager.inviteToGroupUri(groupId), "POST", body)
+}
+
+function cancelInvite(groupId, inviteId) {
+    const body = { id: inviteId }
+    return doFetch(uriManager.cancelInviteUri(groupId), "DELETE", body)
+}
+
+function getInvites() {
+    return doFetch(uriManager.getInvitesUri(), "GET")
+}
+
+function answerInvite(inviteId, answer) {
+    const body = { answer: answer }
+    return doFetch(uriManager.answerInviteUri(inviteId), "POST", body)
+    .then(rsp => {
+        console.log(rsp)
+        return rsp
+    })
+}
+
+
+
 
 function register(username, password) {
     const credentials = {
@@ -101,7 +125,7 @@ function register(username, password) {
         password: password
     }
 
-    return doPost(uriManager.getRegisterUri(), credentials)
+    return doFetch(uriManager.getRegisterUri(), "POST", credentials)
 }
 
 function login(username, password) {
@@ -110,16 +134,15 @@ function login(username, password) {
         password: password
     }
     
-    return doPost(uriManager.getLoginUri(), credentials)
+    return doFetch(uriManager.getLoginUri(), "POST", credentials)
 }
 
 function getCurrentUser() {
-    return fetch(uriManager.getCurrentUserUri())
-        .then(rsp => rsp.json())
+    return doFetch(uriManager.getCurrentUserUri(), "GET")
 }
 
 function logout() {
-    return doPost(uriManager.getLogoutUri())
+    return doFetch(uriManager.getLogoutUri(), "POST")
 }
 
 
@@ -127,9 +150,9 @@ function logout() {
 ///////////////////
 // AUX functions //
 ///////////////////
-function doPost(uri, data) {
+function doFetch(uri, method, data) {
     return fetch(uri, {
-        method: "POST",
+        method: method,
         headers: {
             "Content-Type": "application/json; charset=utf-8",
         },

@@ -9,6 +9,8 @@ module.exports = {
     seriegroupselector : Handlebars.compile(require('../templates/seriegroupselector.hbs').default),
     group_series       : Handlebars.compile(require('../templates/group_series.hbs').default),
     group_seriesbyvote : Handlebars.compile(require('../templates/group_seriesbyvote.hbs').default),
+    group_invites      : Handlebars.compile(require('../templates/group_invites.hbs').default),
+    invites            : Handlebars.compile(require('../templates/invites.hbs').default),
 
     login              : Handlebars.compile(require('../templates/login.hbs').default),
 
