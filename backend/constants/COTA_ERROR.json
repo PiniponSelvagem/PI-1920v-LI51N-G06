@@ -24,6 +24,8 @@
 
         { "id": 75, "severity": 0, "message": "That Invite doesn't exist in our database. Check if the Invite Id is correct."},
         { "id": 76, "severity": 0, "message": "Group Id doesn't match Invite."},
+        { "id": 77, "severity": 0, "message": "You don't have permission to Delete series from the Group. Only the group owner can do that."},
+        
 
         { "id": 80, "severity": 0, "message": "That user doesn't exist in our database. Check if username is correct." },
         { "id": 81, "severity": 0, "message": "That username is already taken :(" },

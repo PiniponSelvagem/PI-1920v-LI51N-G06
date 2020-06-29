@@ -46,22 +46,24 @@ module.exports = function (_fetch, _error, config = _config) {
         }
 
         const options = {
+            method: "POST",
             body: JSON.stringify(body),
             headers: { 'Content-Type': 'application/json'}
         }
 
         const uri = uriManager.getGroupListAllUri()
         return makeRequest(uri, options)
-            .then(body => {
-                console.log(body)
+            .then(body => 
                 body.hits.hits.map(
-                group => {
-                    return {
-                        id: group._id,
-                        name: group._source.name,
-                        description: group._source.description
+                    group => {
+                        return {
+                            id: group._id,
+                            name: group._source.name,
+                            description: group._source.description
+                        }
                     }
-                })})
+                )
+            )
             .then(groups => { debug(`getGroupListAll found ${groups.length} groups`); return groups; })
     }
 
@@ -178,7 +180,14 @@ module.exports = function (_fetch, _error, config = _config) {
             body: JSON.stringify(script),
             headers: { 'Content-Type': 'application/json'}
         }
-        return getGroup(user, groupId).then(makeRequest(uri, options, true)
+        return getGroup(user, groupId)
+            .then(group => {
+                console.log(group)
+                if(group.owner != user.username) {
+                    return Promise.reject(error.get(77))
+                }
+            })
+            .then(makeRequest(uri, options, true)
             .then(body => {
                 if(body.error) {
                     return Promise.reject(error.get(10))
@@ -221,10 +230,7 @@ module.exports = function (_fetch, _error, config = _config) {
         debug(`request to (ElasticSearch) ${uri}`)
         const result = await fetch(uri, options)
             .then(rsp => rsp.json())
-            .then(json => {
-                console.log(json)
-                return json
-            })
+            .catch( err => console.log(err))
         if (refresh) {
             await fetch(uriManager.refresh())
         }

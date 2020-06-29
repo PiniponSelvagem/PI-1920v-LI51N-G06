@@ -77,6 +77,9 @@ function processSuccess(rsp, statusCode) {
 function processError(rsp, statusCode) {
     return function(err) {
         rsp.statusCode = error.toHttpStatusCode(err)
+        if(!err.id){
+            debug(err)
+        }
         rsp.end(JSON.stringify({error:err}))
     }
 }

@@ -101,8 +101,15 @@ module.exports = function(cotaData, templates, context) {
 
                 let buttons = document.querySelectorAll("#btn-delete-serie")
                 for (const button of buttons) {
-                    button.onclick = deleteSerieToGroup
+                    if(context.user.username != rsp.result.owner) {
+                        button.style.display = "none"
+                    } else {
+                        button.onclick = deleteSerieToGroup
+                    }
                 }
+
+                const collaboratorsContainer = document.querySelector("#collaborators-container")
+                collaboratorsContainer.innerHTML = templates.group_collaborators(rsp.result)
 
                 document.querySelector("#btn-edit-group").onclick = editGroup
                 document.querySelector("#btn-series-by-vote").onclick = seriesByVote
