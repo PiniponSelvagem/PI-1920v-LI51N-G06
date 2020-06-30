@@ -68,10 +68,11 @@ module.exports = function(cotaData, templates, context) {
                 document.querySelector("#btn-edit-group").onclick = editGroup
                 document.querySelector("#btn-series-by-vote").onclick = seriesByVote
 
-                const buttons = document.querySelectorAll("#btn-delete-serie")
-                for (const button of buttons) {
+                const delButtons = document.querySelectorAll("#btn-delete-serie")
+                for (const button of delButtons) {
                     button.onclick = deleteSerieToGroup
                 }
+                const scoreButtons = document.querySelectorAll("#btn-score-serie")
             }
         }
 

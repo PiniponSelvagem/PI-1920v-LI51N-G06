@@ -62,7 +62,14 @@ module.exports = function (_movieDb, _cotaDb, _error) {
     }
 
     function addScoreToSerie(user, groupId, seriesId, userScore) {
-        return cotaDb.addScoreToSerie(user, groupId, seriesId, userScore)
+        return getGroup(user, groupId)
+            .then(group =>  group.series)
+            .then(series => {
+                let idx = series.findIndex(serie => serie.id == seriesId)
+                series[idx]['userScore'] = userScore
+                debug(series)
+                return cotaDb.addScoreToSerie(user, groupId, idx, series[idx])
+            })
     }
 
     function removeSeriesFromGroup(user, groupId, seriesId) {

@@ -88,17 +88,20 @@ module.exports = function (_fetch, _error, config = _config) {
                     return {
                             id: series.id,
                             original_name: series.original_name,
-                            name: series.name
+                            name: series.name,
+                            description: series.description,
+                            userScore: series.userScore
                         }
                 })
                 return groupOutput
             })
     }
 
-    function editGroup(user, groupId, name, description) {
+    function editGroup(user, groupId, name, description, series) {
         let doc = {}
         if(name) doc.name = name
         if(description) doc.description = description
+        if(series) doc.series = series
         const options = {
             method: "POST",
             body: JSON.stringify({ doc: doc }),
@@ -106,12 +109,13 @@ module.exports = function (_fetch, _error, config = _config) {
         }
         const uri = uriManager.editGroupUri(groupId)
 
+        debug(doc)
+
         return getGroup(user, groupId).then(makeRequest(uri, options, true)
             .then(body => {
                 if(body.error) {
                     return Promise.reject(error.get(10))
                 }
-                
                 doc.id = body._id
                 return doc
             })
@@ -136,6 +140,7 @@ module.exports = function (_fetch, _error, config = _config) {
         }
         return getGroup(user, groupId).then(makeRequest(uri, options, true)
             .then(body => {
+                debug(body.error.root_cause)
                 if (body.error) {
                     return Promise.reject(error.get(10))
                 }
@@ -145,30 +150,35 @@ module.exports = function (_fetch, _error, config = _config) {
         )
     }
 
-    function addScoreToSerie(user, groupId, serieId, score) {
+    function addScoreToSerie(user, groupId, serieIdx, serie) {
+        debug(serie)
         let script = {
             script: {
-                source: "ctx._source.series.find(serie => serie.id === params.serieId).score = params.score",
+                source: "ctx._source.series[params.idx].userScore = params.serie.userScore",
                 lang: "painless",
-                params: { serieId: serieId, score: score }
+                params: { idx: serieIdx, serie: serie}
             }
         }
-        const uri = uriManager.addScoreToSerieUri(groupId, serieId)
+        const uri = uriManager.addScoreToSerieUri(groupId)
         const options = {
             method: "POST",
-            body: JSON.stringify(serie),
+            body: JSON.stringify(script),
             headers: { 'Content-Type': 'application/json'}
         }
+        debug(`Uri: ${uri}`)
 
         return getGroup(user, groupId)
             .then(makeRequest(uri, options, true)
                 .then(body =>{
+                    debug("==== made the request ====")
                     if (body.error) {
+                        debug(body.error.caused_by)
                         return Promise.reject(error.get(10))
                     }
-                    return serie;
+                    debug(body)
+                    return body;
                 })
-                .then(serie => { debug(`added score of ${score} to series with id: ${serie.id} to group with id: ${groupId}`); return serie; })
+                .then(group => { debug(`added score to series to group with id: ${group._id}`); return group; })
             )
 
     }

@@ -9,6 +9,7 @@ Series:
     - id (Unique Number)
     - original_name (Series Original Name)
     - name (Series Name)
+    - userScore (Score given by the user)
 
 User:
     - username (Username)
