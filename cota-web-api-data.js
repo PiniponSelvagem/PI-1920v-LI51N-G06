@@ -13,6 +13,7 @@ module.exports = function (_cotaDataServices, _error) {
     router.get('/series/group/:gid', getGroup)
     router.post('/series/group/:gid', editGroup)
     router.post('/series/group/:gid/series', addSerieToGroup)
+    router.post('/series/group/:gid/series/:sid', addScoreToSerie)
     router.delete('/series/group/:gid/series/:sid', removeSeriesFromGroup)
     router.get('/series/group/:gid/series', getGroupSeriesByVote)
 
@@ -60,6 +61,13 @@ module.exports = function (_cotaDataServices, _error) {
     function addSerieToGroup(req, rsp) {
         req.isAuthenticated()
             ? cotaDataServices.addSerieToGroup(req.user, req.params.gid, req.body.id).sendResponse(rsp, 201)
+            : Promise.reject(error.get(60)).sendResponse(rsp)
+    }
+
+    //POST .../series/group/:gid/series/:sid
+    function addScoreToSerie(req, rsp) {
+        req.isAuthenticated()
+            ? cotaDataServices.addScoreToSerie(req.user, req.params.gid, req.params.sid, req.body.score).sendResponse(rsp)
             : Promise.reject(error.get(60)).sendResponse(rsp)
     }
 

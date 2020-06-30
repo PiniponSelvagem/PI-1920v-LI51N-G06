@@ -19,6 +19,7 @@ module.exports = function (_fetch, _error, config = _config) {
         getGroup              : getGroup,
         editGroup             : editGroup,
         addSerieToGroup       : addSerieToGroup,
+        addScoreToSerie       : addScoreToSerie,
         removeSeriesFromGroup : removeSeriesFromGroup
     }
 
@@ -29,6 +30,7 @@ module.exports = function (_fetch, _error, config = _config) {
         this.getGroupUri = (id) => `${baseUri}_doc/${id}`
         this.editGroupUri = (id) => `${baseUri}_doc/${id}/_update`
         this.addSerieToGroupUri = (id) => `${baseUri}_doc/${id}/_update`
+        this.addScoreToSerieUri = (id) => `${baseUri}_doc/${id}/_update`
         this.removeSeriesFromGroupUri = (id) => `${baseUri}_doc/${id}/_update`
         this.refresh = () => `${baseUri}_refresh`
     }
@@ -141,6 +143,34 @@ module.exports = function (_fetch, _error, config = _config) {
             })
             .then(serie => { debug(`added series with id: ${serie.id} to group with id: ${groupId}`); return serie; })
         )
+    }
+
+    function addScoreToSerie(user, groupId, serieId, score) {
+        let script = {
+            script: {
+                source: "ctx._source.series.find(serie => serie.id === params.serieId).score = params.score",
+                lang: "painless",
+                params: { serieId: serieId, score: score }
+            }
+        }
+        const uri = uriManager.addScoreToSerieUri(groupId, serieId)
+        const options = {
+            method: "POST",
+            body: JSON.stringify(serie),
+            headers: { 'Content-Type': 'application/json'}
+        }
+
+        return getGroup(user, groupId)
+            .then(makeRequest(uri, options, true)
+                .then(body =>{
+                    if (body.error) {
+                        return Promise.reject(error.get(10))
+                    }
+                    return serie;
+                })
+                .then(serie => { debug(`added score of ${score} to series with id: ${serie.id} to group with id: ${groupId}`); return serie; })
+            )
+
     }
 
     function removeSeriesFromGroup(user, groupId, serieId) {

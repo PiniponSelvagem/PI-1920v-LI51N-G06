@@ -14,6 +14,7 @@ module.exports = function (_movieDb, _cotaDb, _error) {
         getGroup              : getGroup,
         editGroup             : editGroup,
         addSerieToGroup       : addSerieToGroup,
+        addScoreToSerie       : addScoreToSerie,
         removeSeriesFromGroup : removeSeriesFromGroup,
         getGroupSeriesByVote  : getGroupSeriesByVote
     }
@@ -58,6 +59,10 @@ module.exports = function (_movieDb, _cotaDb, _error) {
                 }
                 return cotaDb.addSerieToGroup(user, groupId, formatedSeries)
             })
+    }
+
+    function addScoreToSerie(user, groupId, seriesId, userScore) {
+        return cotaDb.addScoreToSerie(user, groupId, seriesId, userScore)
     }
 
     function removeSeriesFromGroup(user, groupId, seriesId) {
