@@ -14,7 +14,12 @@
             <td>{{name}}</td>
             <td>{{original_name}}</td>
             <td>{{userScore}}</td>
-            <td><input type="number" id="score" min="1" max="10" step="1" value="1"/><button id="btn-score-serie" value={{id}}>set score</button></td>
+            <td>
+                <div class="data-score">
+                    <input id="userScore" type="number" min="1" max="10" step="1" value="1"/>
+                    <button id="btnScoreSerie" value={{id}}>set score</button>
+                </div>
+            </td>
             <td><button id="btn-delete-serie" value={{id}}>delete</button></td>
         </tr>
         {{/each}}

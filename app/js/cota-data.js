@@ -6,6 +6,7 @@ module.exports = {
     createGroup          : createGroup,
     editGroup            : editGroup,
     addSerieToGroup      : addSerieToGroup,
+    addScoreToSerie      : addScoreToSerie,
     getSeriesByVote      : getSeriesByVote,
     deleteSerieFromGroup : deleteSerieFromGroup,
 
@@ -32,6 +33,7 @@ function UriManager() {
     this.getAddGroupUri = () => `${dataUri}series/group`
     this.getEditGroupUri = (id) => `${dataUri}series/group/${id}`
     this.getSerieAddGroupUri = (id) => `${dataUri}series/group/${id}/series`
+    this.getSerieAddScoreUri = (gid, sid) => `${dataUri}series/group/${gid}/series/${sid}`
     this.getSeriesByVoteUri = (id, min, max) => `${dataUri}series/group/${id}/series?min=${min}&max=${max}`
     this.getDeleteSerieFromGroupUri = (groupId, serieId) => `${dataUri}series/group/${groupId}/series/${serieId}`
 
@@ -78,6 +80,11 @@ function editGroup(id, group) {
 function addSerieToGroup(groupId, serieId) {
     const serie = { id: serieId }
     return doPost(uriManager.getSerieAddGroupUri(groupId), serie)
+}
+
+function addScoreToSerie(groupId, seriesId, score){
+    const body = { userScore: score}
+    return doPost(uriManager.getSerieAddScoreUri(groupId, seriesId), body)
 }
 
 function getSeriesByVote(groupId, voteRange) {

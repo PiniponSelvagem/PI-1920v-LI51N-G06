@@ -140,8 +140,8 @@ module.exports = function (_fetch, _error, config = _config) {
         }
         return getGroup(user, groupId).then(makeRequest(uri, options, true)
             .then(body => {
-                debug(body.error.root_cause)
                 if (body.error) {
+                    debug(body.error.root_cause)
                     return Promise.reject(error.get(10))
                 }
                 return serie;

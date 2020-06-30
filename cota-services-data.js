@@ -68,6 +68,7 @@ module.exports = function (_movieDb, _cotaDb, _error) {
                 let idx = series.findIndex(serie => serie.id == seriesId)
                 series[idx]['userScore'] = userScore
                 debug(series)
+                debug(userScore)
                 return cotaDb.addScoreToSerie(user, groupId, idx, series[idx])
             })
     }
