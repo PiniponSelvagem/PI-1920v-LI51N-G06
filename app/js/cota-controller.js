@@ -72,9 +72,9 @@ module.exports = function(cotaData, templates, context) {
                 for (const button of delButtons) {
                     button.onclick = deleteSerieToGroup
                 }
-                const scoreButtons = document.querySelectorAll(".data-score")
-                for (const button of scoreButtons) {
-                    button.onclick = addScoreToSeries
+                const scoreData = document.querySelectorAll("#btn-score-serie")
+                for (const data of scoreData) {
+                    data.onclick = addScoreToSeries
                 }
             }
         }
@@ -112,10 +112,13 @@ module.exports = function(cotaData, templates, context) {
         function addScoreToSeries() {
             const groupId = window.location.hash.substring(1).split("/")[1]
             const serieId = this.value
-            const score = document.querySelector("#userscore").value
+            location.hash = `group/${groupId}`
+            let score = []
+            document.querySelectorAll(".data-score input")
+                .forEach(input => score.push(input.value))
 
-            //console.log(score)
-            cotaData.addScoreToSerie(groupId, serieId, score)
+            console.log(serieId)
+            cotaData.addScoreToSerie(groupId, serieId, score[0])
 
         }
     }

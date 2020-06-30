@@ -4,7 +4,7 @@
             <th>Name</th>
             <th>Original Name</th>
             <th>User Score</th>
-            <th id="th-score">Set Score</th>
+            <th id="th-score"></th>
             <th id="th-button"></th>
         </tr>
     </thead>
@@ -14,12 +14,7 @@
             <td>{{name}}</td>
             <td>{{original_name}}</td>
             <td>{{userScore}}</td>
-            <td>
-                <div class="data-score">
-                    <input id="userScore" type="number" min="1" max="10" step="1" value="1"/>
-                    <button id="btnScoreSerie" value={{id}}>set score</button>
-                </div>
-            </td>
+            <td><button id="btn-score-serie" value={{id}}>set score</button></td>
             <td><button id="btn-delete-serie" value={{id}}>delete</button></td>
         </tr>
         {{/each}}

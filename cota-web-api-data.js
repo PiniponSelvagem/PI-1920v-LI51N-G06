@@ -67,7 +67,7 @@ module.exports = function (_cotaDataServices, _error) {
     //POST .../series/group/:gid/series/:sid
     function addScoreToSerie(req, rsp) {
         req.isAuthenticated()
-            ? cotaDataServices.addScoreToSerie(req.user, req.params.gid, req.params.sid, req.body.score).sendResponse(rsp)
+            ? cotaDataServices.addScoreToSerie(req.user, req.params.gid, req.params.sid, req.body.userScore).sendResponse(rsp)
             : Promise.reject(error.get(60)).sendResponse(rsp)
     }
 
