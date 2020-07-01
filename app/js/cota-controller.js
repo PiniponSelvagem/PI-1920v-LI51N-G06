@@ -39,6 +39,20 @@ module.exports = function(cotaData, templates, context) {
                 showNonAuthenticated()
                 return
             }
+
+            rsp.result.forEach(group => {
+                if (group.series){
+                    group.avgScore = 0;
+                    let scoredSeries = group.series.filter(serie => {
+                        if (serie.userScore) {
+                            group.avgScore += serie.userScore
+                            return true
+                        }
+                        return false
+                    })
+                    group.avgScore = group.avgScore/scoredSeries.length
+                }
+            })
             mainContent.innerHTML = templates.grouplist(rsp.result)
             document.querySelector("#btn-create-group").onclick = createGroup
         }
@@ -117,7 +131,6 @@ module.exports = function(cotaData, templates, context) {
             document.querySelectorAll(".data-score input")
                 .forEach(input => score.push(input.value))
 
-            console.log(serieId)
             cotaData.addScoreToSerie(groupId, serieId, score[0])
 
         }

@@ -43,7 +43,8 @@ module.exports = function (_fetch, _error, config = _config) {
                     return {
                         id: group._id,
                         name: group._source.name,
-                        description: group._source.description
+                        description: group._source.description,
+                        series: group._source.series
                     }
                 }))
             .then(body => { debug(`getGroupListAll found ${body.length} groups`); return body; })
@@ -109,8 +110,6 @@ module.exports = function (_fetch, _error, config = _config) {
         }
         const uri = uriManager.editGroupUri(groupId)
 
-        debug(doc)
-
         return getGroup(user, groupId).then(makeRequest(uri, options, true)
             .then(body => {
                 if(body.error) {
@@ -151,7 +150,6 @@ module.exports = function (_fetch, _error, config = _config) {
     }
 
     function addScoreToSerie(user, groupId, serieIdx, serie) {
-        debug(serie)
         let script = {
             script: {
                 source: "ctx._source.series[params.idx].userScore = params.serie.userScore",
@@ -165,20 +163,17 @@ module.exports = function (_fetch, _error, config = _config) {
             body: JSON.stringify(script),
             headers: { 'Content-Type': 'application/json'}
         }
-        debug(`Uri: ${uri}`)
 
         return getGroup(user, groupId)
             .then(makeRequest(uri, options, true)
                 .then(body =>{
-                    debug("==== made the request ====")
                     if (body.error) {
                         debug(body.error.caused_by)
                         return Promise.reject(error.get(10))
                     }
-                    debug(body)
                     return body;
                 })
-                .then(group => { debug(`added score to series to group with id: ${group._id}`); return group; })
+                .then(group => { debug(`added score:${serie.userScore} to series:${serie.name} to group with id: ${group._id}`); return group; })
             )
 
     }
