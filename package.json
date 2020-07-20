@@ -6,8 +6,8 @@
   "scripts": {
     "test": "mocha",
     "devmode": "set DEBUG=cota:* & nodemon backend/cota-server.js",
-    "debug": "set DEBUG=cota:* & node cota-server.js",
-    "start": "node cota-server.js"
+    "debug": "set DEBUG=cota:* & node backend/cota-server.js",
+    "start": "node backend/cota-server.js"
   },
   "author": "PI-1920v-LI51N-G06",
   "license": "ISC",
